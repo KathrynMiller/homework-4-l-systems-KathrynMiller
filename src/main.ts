@@ -15,14 +15,12 @@ const controls = {
   tesselations: 5,
   'Load Scene': loadScene, // A function pointer, essentially
   color : [219, 10, 91],
-  funShader : false,
 };
 
 let icosphere: Icosphere;
 let square: Square;
 let cube: Cube;
 let time: number = 0;
-let currShader: ShaderProgram;
 
 function loadScene() {
   icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, controls.tesselations);
@@ -45,7 +43,6 @@ function main() {
   gui.add(controls, 'tesselations', 0, 8).step(1);
   gui.add(controls, 'Load Scene');
   var color = gui.addColor(controls, 'color');
-  var shaderSwitch = gui.add(controls, 'funShader');
  
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -72,42 +69,26 @@ function main() {
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag.glsl')),
   ]);
 
-  const extra = new ShaderProgram([
-    new Shader(gl.VERTEX_SHADER, require('./shaders/extra-vert.glsl')),
-    new Shader(gl.FRAGMENT_SHADER, require('./shaders/extra-frag.glsl')),
-  ])
-
-  currShader = lambert;
   // initialize time in shader
-  currShader.setTime(time);
+  lambert.setTime(time);
   time++;
   
   // This function will be called every frame
   function tick() {
     camera.update();
-
-    shaderSwitch.onChange(function(value: boolean) {
-      if(value == false) {
-        currShader = lambert;
-        console.log("LAMBERT");
-      } else {
-        currShader = extra;
-        console.log("EXTRA");
-      }
-
-    });
-    extra.setTime(time);
+    
+    lambert.setTime(time);
     time++;
 
     //set color of current shader
-    currShader.setGeometryColor(vec4.fromValues(controls.color[0]/255.0,controls.color[1]/255.0, controls.color[2]/255.0, 1.0));
+    lambert.setGeometryColor(vec4.fromValues(controls.color[0]/255.0,controls.color[1]/255.0, controls.color[2]/255.0, 1.0));
 
 
     stats.begin();
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
   
-    renderer.render(camera, currShader, [
+    renderer.render(camera, lambert, [
        //icosphere,
       //square,
       cube,

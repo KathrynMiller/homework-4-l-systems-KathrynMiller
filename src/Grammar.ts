@@ -4,15 +4,18 @@ class Grammar {
     // array of strings representing current grammar
     grammar : string[] = new Array();
     // start squence of the grammar
-    axiom: string = "AB";
+    axiom: string;
     // number of iterations of grammar
-    depth: number = 5;
+    depth: number;
 
-    constructor() {
+    constructor(a: string, d: number) {
+        this.axiom = a;
+        this.depth = d;
         // initialize grammar array
         for(let i = 0; i < this.axiom.length; i++) {
             this.grammar.push(this.axiom[i]);
         }
+        this.expand();
     }
 
     expand() {
@@ -23,18 +26,21 @@ class Grammar {
                 if(this.grammar[i] == "[" || this.grammar[i] == "]") {
                     newGrammar.push(this.grammar[i]);
                 } else {
-                    newGrammar.concat(this.mapString(this.grammar[i]));
+                    newGrammar = newGrammar.concat(this.expandString(this.grammar[i]));
                 }
             }
             this.grammar = newGrammar;
         }
     }
 
-    mapString(s: string) : string[] {
-        if(s == "a") {
-            return ["a","b", "a"];
+    // TODO: add probability mappings
+    expandString(s: string) : string[] {
+        if(s == "-") {
+            return ["-","b", "+"];
         } else if (s == "b") {
-            return ["a"];
+            return ["b", "b"];
+        } else if (s == '+') {
+            return ["-"];
         }
     }
 
@@ -43,3 +49,5 @@ class Grammar {
     }
 
 }
+
+export default Grammar;

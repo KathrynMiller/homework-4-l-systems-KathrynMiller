@@ -8,6 +8,7 @@ import OpenGLRenderer from './rendering/gl/OpenGLRenderer';
 import Camera from './Camera';
 import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
+import Plant from './geometry/Plant';
 
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
@@ -20,13 +21,12 @@ const controls = {
 let icosphere: Icosphere;
 let square: Square;
 let cube: Cube;
+let plant: Plant;
 let time: number = 0;
 
 function loadScene() {
-  icosphere = new Icosphere(vec3.fromValues(0, 0, 0), 1, controls.tesselations);
-  icosphere.create();
-  cube = new Cube(vec3.fromValues(0, 0, 0));
-  cube.create();
+  plant = new Plant(vec3.fromValues(0, 0, 0));
+  plant.create();
 }
 
 function main() {
@@ -89,9 +89,7 @@ function main() {
     renderer.clear();
   
     renderer.render(camera, lambert, [
-       //icosphere,
-      //square,
-      cube,
+       plant,
     ]);
     stats.end();
 

@@ -7,10 +7,14 @@ class Grammar {
     axiom: string;
     // number of iterations of grammar
     depth: number;
+    branchMap: string[] = new Array();
 
     constructor(a: string, d: number) {
         this.axiom = a;
         this.depth = d;
+        this.branchMap.push("b[+b]b[-b]");
+        this.branchMap.push("-^[+b]b[-b]");
+        this.branchMap.push("[-^b[++f]b[-f]b]");
         // initialize grammar array
         for(let i = 0; i < this.axiom.length; i++) {
             this.grammar.push(this.axiom[i]);
@@ -35,13 +39,26 @@ class Grammar {
 
     // TODO: add probability mappings
     expandString(s: string) : string[] {
+        let rand = Math.random();
+        let rule: string = " ";
         if(s == "-") {
             return ["-","b", "+"];
         } else if (s == "b") {
-            return ["b", "[", "+", "b", "]", "b", "[", "-", "b", "]", "b"];
+            rand *= this.branchMap.length;
+            rule = this.branchMap[Math.floor(rand)];
         } else if (s == '+') {
             return ["-"];
+        } else if (s == "^") {
+
+        } else if (s == "f") {
+            
         }
+        // turn string into string[] and return
+        let array = [];
+        for(let i = 0; i < rule.length; i++) {
+            array.push(rule.charAt(i));
+        }
+        return array;
     }
 
     getGrammar(): string[] {

@@ -1,4 +1,4 @@
-import {vec4, mat3, mat4} from 'gl-matrix';
+import {vec3, vec4, mat3, mat4} from 'gl-matrix';
 import { rotateX, rotateY, rotateZ, multiply } from 'gl-mat4';
 
 class Turtle {
@@ -13,7 +13,7 @@ class Turtle {
         mat4.copy(this.totalRotation, r);
     }
 
-    rotateX(degree: number) {
+    rotate(degree: number, x: number, y: number, z: number) {
         let r = Math.random();
         // add variation to branches by altering within 10 degree range
         r *= 10.0;
@@ -21,39 +21,9 @@ class Turtle {
         degree += r;
         let rotation = mat4.create();
         // create rotation matrix from identity
-        rotation = mat4.rotateX(rotation, mat4.create(), this.toRadians(degree));
+        rotation = mat4.rotate(rotation, mat4.create(), this.toRadians(degree), vec3.fromValues(x, y, z));
         // add this rotation to total rotation of turtle
-        mat4.rotateX(this.totalRotation, this.totalRotation, this.toRadians(degree));
-        // extract orientation values from matrix and normalize the direction
-        this.orientation = vec4.normalize(this.orientation, vec4.transformMat4(this.orientation, this.orientation, rotation));
-    }
-
-    rotateY(degree: number) {
-        let r = Math.random();
-        // add variation to branches by altering within 10 degree range
-        r *= 10.0;
-        r -= 5.0;
-        degree += r;
-        let rotation = mat4.create();
-        // create rotation matrix from identity
-        rotation = mat4.rotateY(rotation, mat4.create(), this.toRadians(degree));
-        // add this rotation to total rotation of turtle
-        mat4.rotateY(this.totalRotation, this.totalRotation, this.toRadians(degree));
-        // extract orientation values from matrix and normalize the direction
-        this.orientation = vec4.normalize(this.orientation, vec4.transformMat4(this.orientation, this.orientation, rotation));
-    }
-
-    rotateZ(degree: number) {
-        let r = Math.random();
-        // add variation to branches by altering within 10 degree range
-        r *= 10.0;
-        r -= 5.0;
-        degree += r;
-        let rotation = mat4.create();
-        // create rotation matrix from identity
-        rotation = mat4.rotateZ(rotation, mat4.create(), this.toRadians(degree));
-        // add this rotation to total rotation of turtle
-        mat4.rotateZ(this.totalRotation, this.totalRotation, this.toRadians(degree));
+        mat4.rotate(this.totalRotation, this.totalRotation, this.toRadians(degree), vec3.fromValues(x, y, z));
         // extract orientation values from matrix and normalize the direction
         this.orientation = vec4.normalize(this.orientation, vec4.transformMat4(this.orientation, this.orientation, rotation));
     }
@@ -62,7 +32,7 @@ class Turtle {
         let dir = vec4.create();
         dir = vec4.multiply(dir, this.orientation, vec4.fromValues(distance, distance, distance, 1.0))
         this.position = vec4.add(this.position, this.position, dir); 
-        this.position[3] = 1;   
+        this.position[3] = 1; 
     }
 
     getPos() : vec4 {

@@ -15,6 +15,7 @@ class TurtleStack {
     addTurtle(): Turtle {
         let newTurtle = new Turtle(this.turtle.getPos(), this.turtle.getOrientation(), this.turtle.getRotation());
         this.stack.push(this.turtle);
+        this.turtle = newTurtle;
         return newTurtle;
     }
 

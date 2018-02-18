@@ -20,7 +20,7 @@ class Plant extends Drawable {
 
   lastIndex: number = 0;
   center: vec4;
-  depth: number;
+  depth: number = 1;
   // stack for holding the turtles
   turtleStack: TurtleStack;
   turtle: Turtle;
@@ -109,37 +109,35 @@ this.stemPositions = [[-.25, 0, 0, 1],
 // set of functions to map grammar to
 //TODO add randomness to rotations 
   mapMinus() {
-    this.turtle.rotateZ(-30);
-      /*
       let rand = Math.random();
-      if(rand < .33) {
-        this.turtle.rotateX(-30);
-      } else if (rand < .66) {
-        this.turtle.rotateY(-30);
+      if(rand < .5) {
+        this.turtle.rotate(-30, 1, 0, 0);
       } else {
-        this.turtle.rotateZ(-30);
-      }
-      */
-      
+        this.turtle.rotate(-30, 0, 0, 1);
+      } 
   }
 
   mapPlus() {
-    this.turtle.rotateZ(30);
-      /*
     let rand = Math.random();
-      if(rand < .33) {
-        this.turtle.rotateX(30);
-      } else if (rand < .66) {
-        this.turtle.rotateY(30);
+    if(rand < .5) {
+        this.turtle.rotate(30, 1, 0, 0);
       } else {
-        this.turtle.rotateZ(30);
+        this.turtle.rotate(30, 0, 0, 1);
+      } 
+}
+// only use rotY after an x or z rotation to avoid weird twisted overlapping line
+rotY() {
+    let rand = Math.random();
+      if(rand < .5) {
+        this.turtle.rotate(-30, 0, 1, 0);
+      } else{
+        this.turtle.rotate(30, 0, 1, 0);
       }
-      */
 }
 // base length and width of branch based on depth of turtle
   addBranch() {
     // modify later
-    let scaleFactor = 1.0;
+    let scaleFactor = 2;
     let length = 2.0;
     let scale = 1.0 / Math.pow(scaleFactor, this.depth);
     
@@ -147,13 +145,13 @@ this.stemPositions = [[-.25, 0, 0, 1],
         let transPos = vec4.create();
         let transNor = vec4.create();
     
-        console.log("scale: " + scale);
         transPos = vec4.scale(transPos, transPos, scale);
 
         // rotate the branch positions
         transPos = vec4.transformMat4(transPos, this.stemPositions[i], this.turtle.getRotation());
 
         // move base to turtle's position
+        //vec4.scale(transPos, this.turtle.getOrientation(), length);
         vec4.add(transPos, transPos, this.turtle.getPos());
         transPos[3] = 1;
 
@@ -183,30 +181,23 @@ this.stemPositions = [[-.25, 0, 0, 1],
     // fill stem mini-vbo data
     this.loadObjs();
     // create grammar with input axiom
-    this.grammar = new Grammar("b+", 1);
+    this.grammar = new Grammar("b+", 3);
   }
 
   // handles turtle operations
  // construct shape from grammar 
  buildShape() {
+
    let string = this.grammar.getGrammar();
     for(let i = 0; i < string.length; i++) {
-        if(string[i] == "[") { // push turtle to stack and create new one at current position
+        if(string[i] == "[") {
             // increase depth of turtles
-            console.log("PUSH");
-            console.log("orientation: " + this.turtle.getOrientation());
-            console.log("pos: " + this.turtle.getPos());
             this.depth++;
             this.turtle = this.turtleStack.addTurtle();
-            
-           // let newTurtle = new Turtle(this.turtle.getPos(), this.turtle.getOrientation(), this.turtle.getRotation(), this.turtle.getDepth());
-            //this.turtle = newTurtle;
+            console.log("PUSH");
         } else if (string[i] == "]") {
-            this.turtle = this.turtleStack.popTurtle();
             console.log("POP");
-            console.log("orientation: " + this.turtle.getOrientation());
-            console.log("pos: " + this.turtle.getPos());
-            // only need to increase depth of the saved turtle because the new turtle is gone now
+            this.turtle = this.turtleStack.popTurtle();
             this.depth--;
         } else if(string[i] == "b") {
             this.addBranch();
@@ -214,6 +205,8 @@ this.stemPositions = [[-.25, 0, 0, 1],
             this.mapMinus();
         } else if (string[i] == "+") {
             this.mapPlus();
+        } else if (string[i] == "^") {
+            this.rotY();
         }
     }
 

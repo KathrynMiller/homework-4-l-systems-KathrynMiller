@@ -1,9 +1,10 @@
-import {vec3, vec4, mat4} from 'gl-matrix';
+import {vec3, vec4, mat4, quat} from 'gl-matrix';
 import Drawable from '../rendering/gl/Drawable';
 import {gl} from '../globals';
 import Turtle from '../Turtle';
 import Grammar from '../Grammar';
 import Cube from './Cube';
+import TurtleStack from '../TurtleStack';
 
 
 class Plant extends Drawable {
@@ -19,9 +20,10 @@ class Plant extends Drawable {
 
   lastIndex: number = 0;
   center: vec4;
-  turtle: Turtle;
+  depth: number;
   // stack for holding the turtles
-  turtleStack: Turtle[] = new Array();
+  turtleStack: TurtleStack;
+  turtle: Turtle;
   // expanded string that defines turtle path
   grammar: Grammar;
 
@@ -69,35 +71,35 @@ this.stemNormals = [[0, 0, 1, 0],
          [0, -1, 0, 0],
          [0, -1, 0, 0],
          [0, -1, 0, 0]];
-this.stemPositions = [[-.25, -1, 0, 1],
-           [.25, -1, 0, 1],
-           [.25, 1, 0, 1],
-           [-.25, 1, 0, 1],
+this.stemPositions = [[-.25, 0, 0, 1],
+           [.25, 0, 0, 1],
+           [.25, 2, 0, 1],
+           [-.25, 2, 0, 1],
 
-           [-.25, -1, -.5, 1],
-           [.25, -1, -.5, 1],
-           [.25, 1, -.5, 1], 
-           [-.25, 1, -.5, 1],
+           [-.25, 0, -.5, 1],
+           [.25, 0, -.5, 1],
+           [.25, 2, -.5, 1], 
+           [-.25, 2, -.5, 1],
 
-           [.25, -1, 0, 1],
-          [.25, -1, -.5, 1],
-            [.25, 1, -.5, 1],
-            [.25, 1, 0, 1],
+           [.25, 0, 0, 1],
+          [.25, 0, -.5, 1],
+            [.25, 2, -.5, 1],
+            [.25, 2, 0, 1],
 
-            [-.25, -1, 0, 1],
-            [-.25, -1, -.5, 1],
-            [-.25, 1, -.5, 1],
-            [-.25, 1, 0, 1],
+            [-.25, 0, 0, 1],
+            [-.25, 0, -.5, 1],
+            [-.25, 2, -.5, 1],
+            [-.25, 2, 0, 1],
 
-            [-.25, 1, 0, 1],
-            [.25, 1, 0, 1],
-            [.25, 1, -.5, 1],
-            [-.25, 1, -.5, 1],
+            [-.25, 2, 0, 1],
+            [.25, 2, 0, 1],
+            [.25, 2, -.5, 1],
+            [-.25, 2, -.5, 1],
 
-            [-.25, -1, 0, 1],
-            [.25, -1, 0, 1],
-            [.25, -1, -.5, 1],
-            [-.25, -1, -.5, 1]];
+            [-.25, 0, 0, 1],
+            [.25, 0, 0, 1],
+            [.25, 0, -.5, 1],
+            [-.25, 0, -.5, 1]];
 
 
 
@@ -105,45 +107,69 @@ this.stemPositions = [[-.25, -1, 0, 1],
 }
 
 // set of functions to map grammar to
+//TODO add randomness to rotations 
   mapMinus() {
-      this.turtle.rotateZ(-30);
+    this.turtle.rotateZ(-30);
+      /*
+      let rand = Math.random();
+      if(rand < .33) {
+        this.turtle.rotateX(-30);
+      } else if (rand < .66) {
+        this.turtle.rotateY(-30);
+      } else {
+        this.turtle.rotateZ(-30);
+      }
+      */
+      
   }
 
   mapPlus() {
     this.turtle.rotateZ(30);
+      /*
+    let rand = Math.random();
+      if(rand < .33) {
+        this.turtle.rotateX(30);
+      } else if (rand < .66) {
+        this.turtle.rotateY(30);
+      } else {
+        this.turtle.rotateZ(30);
+      }
+      */
 }
 // base length and width of branch based on depth of turtle
-  mapB() {
-      console.log("ADD BRANCH");
+  addBranch() {
     // modify later
-    let length = 1;
+    let scaleFactor = 1.0;
+    let length = 2.0;
+    let scale = 1.0 / Math.pow(scaleFactor, this.depth);
+    
     for(let i = 0; i < this.stemPositions.length; i++) {
         let transPos = vec4.create();
         let transNor = vec4.create();
+    
+        console.log("scale: " + scale);
+        transPos = vec4.scale(transPos, transPos, scale);
+
         // rotate the branch positions
         transPos = vec4.transformMat4(transPos, this.stemPositions[i], this.turtle.getRotation());
+
         // move base to turtle's position
         vec4.add(transPos, transPos, this.turtle.getPos());
         transPos[3] = 1;
 
-       // console.log("translated Pos: " + transPos);
         // rotate normals based on turtle rotation
         transNor = vec4.transformMat4(transNor, this.stemNormals[i], this.turtle.getRotation());
-        // add transformed positions and normals to the final set of positions
-        this.finalPos.push(transPos[0]);
-        this.finalPos.push(transPos[1]);
-        this.finalPos.push(transPos[2]);
-        this.finalPos.push(transPos[3]);
-        this.finalNor.push(transNor[0]);
-        this.finalNor.push(transNor[1]);
-        this.finalNor.push(transNor[2]);
-        this.finalNor.push(transNor[3]);
-    }
 
+        // add transformed positions and normals to the final set of positions
+        this.finalPos = this.finalPos.concat([transPos[0], transPos[1], transPos[2], transPos[3]]);
+        this.finalNor = this.finalNor.concat([transNor[0], transNor[1], transNor[2], transNor[3]]);
+    }
+    // adjust indices and add to final list
     for(let i = 0; i < this.stemIndices.length; i++) {
             this.finalIndices.push(this.stemIndices[i] + this.lastIndex);
     }
     this.lastIndex += this.stemPositions.length;
+
     // move turtle to end of new branch
     this.turtle.move(length);
 
@@ -152,30 +178,38 @@ this.stemPositions = [[-.25, -1, 0, 1],
   constructor(center: vec3) {
     super(); // Call the constructor of the super class. This is required.
     this.center = vec4.fromValues(center[0], center[1], center[2], 1);
-    this.turtle = new Turtle(vec4.fromValues(0, 0, 0, 1), vec4.fromValues(0, 1, 0, 1), mat4.create(), 0);
+    this.turtleStack = new TurtleStack();
+    this.turtle = this.turtleStack.getTurtle();
     // fill stem mini-vbo data
     this.loadObjs();
     // create grammar with input axiom
-    this.grammar = new Grammar("b-", 1);
+    this.grammar = new Grammar("b+", 1);
   }
 
   // handles turtle operations
  // construct shape from grammar 
  buildShape() {
-    let string = this.grammar.getGrammar();
+   let string = this.grammar.getGrammar();
     for(let i = 0; i < string.length; i++) {
         if(string[i] == "[") { // push turtle to stack and create new one at current position
             // increase depth of turtles
-            this.turtle.incDepth();
-            this.turtleStack.push(this.turtle);
-            let newTurtle = new Turtle(this.turtle.getPos(), this.turtle.getOrientation(), this.turtle.getRotation(), this.turtle.getDepth());
-            this.turtle = newTurtle;
+            console.log("PUSH");
+            console.log("orientation: " + this.turtle.getOrientation());
+            console.log("pos: " + this.turtle.getPos());
+            this.depth++;
+            this.turtle = this.turtleStack.addTurtle();
+            
+           // let newTurtle = new Turtle(this.turtle.getPos(), this.turtle.getOrientation(), this.turtle.getRotation(), this.turtle.getDepth());
+            //this.turtle = newTurtle;
         } else if (string[i] == "]") {
-            this.turtle = this.turtleStack.pop();
+            this.turtle = this.turtleStack.popTurtle();
+            console.log("POP");
+            console.log("orientation: " + this.turtle.getOrientation());
+            console.log("pos: " + this.turtle.getPos());
             // only need to increase depth of the saved turtle because the new turtle is gone now
-            this.turtle.decDepth();
+            this.depth--;
         } else if(string[i] == "b") {
-            this.mapB();
+            this.addBranch();
         } else if (string[i] == "-") {
             this.mapMinus();
         } else if (string[i] == "+") {
@@ -192,8 +226,7 @@ this.stemPositions = [[-.25, -1, 0, 1],
   var indices = Uint32Array.from(this.finalIndices);
   var normals = Float32Array.from(this.finalNor);
   var positions = Float32Array.from(this.finalPos);
-console.log(indices);
-console.log(positions);
+
     this.generateIdx();
     this.generatePos();
     this.generateNor();

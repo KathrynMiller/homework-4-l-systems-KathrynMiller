@@ -38,7 +38,7 @@ class Grammar {
         if(s == "-") {
             return ["-","b", "+"];
         } else if (s == "b") {
-            return ["b", "b"];
+            return ["b", "[", "+", "b", "]", "b", "[", "-", "b", "]", "b"];
         } else if (s == '+') {
             return ["-"];
         }

@@ -13,8 +13,11 @@ class Grammar {
         this.axiom = a;
         this.depth = d;
         this.branchMap.push("b[+b]b[-b]");
-        this.branchMap.push("-^[+b]b[-b]");
+        this.branchMap.push("-[+b]b[-b]");
         this.branchMap.push("[-^b[++f]b[-f]b]");
+        this.branchMap.push("b[-b]b[+b]");
+        this.branchMap.push("+^[-b]b[+b]");
+        this.branchMap.push("[+b[--fb]b[+f]b]");
         // initialize grammar array
         for(let i = 0; i < this.axiom.length; i++) {
             this.grammar.push(this.axiom[i]);

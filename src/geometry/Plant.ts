@@ -5,7 +5,7 @@ import Turtle from '../Turtle';
 import Grammar from '../Grammar';
 import Cube from './Cube';
 import TurtleStack from '../TurtleStack';
-
+import objLoader from '../objLoader';
 
 class Plant extends Drawable {
 
@@ -26,6 +26,7 @@ class Plant extends Drawable {
   turtle: Turtle;
   // expanded string that defines turtle path
   grammar: Grammar;
+  objLoader: objLoader = new objLoader();
 
   // fix later to use an actual obj loader
 loadObjs() {
@@ -142,14 +143,13 @@ rotY() {
     let scale = 1.0 / Math.pow(scaleFactor, this.depth);
     
     for(let i = 0; i < this.stemPositions.length; i++) {
-        let transPos = vec4.create();
+        let transPos = vec4.fromValues(this.stemPositions[i][0], this.stemPositions[i][1], this.stemPositions[i][2], 1);
         let transNor = vec4.create();
     
         transPos = vec4.scale(transPos, transPos, scale);
-
+        
         // rotate the branch positions
         transPos = vec4.transformMat4(transPos, this.stemPositions[i], this.turtle.getRotation());
-
         // move base to turtle's position
         //vec4.scale(transPos, this.turtle.getOrientation(), length);
         vec4.add(transPos, transPos, this.turtle.getPos());
@@ -179,24 +179,29 @@ rotY() {
     this.turtleStack = new TurtleStack();
     this.turtle = this.turtleStack.getTurtle();
     // fill stem mini-vbo data
-    this.loadObjs();
+    this.objLoader.load("src/objs/stem.obj");
+    this.stemPositions = this.objLoader.getPositions();
+    this.stemIndices = this.objLoader.getIndices();
+    this.stemNormals = this.objLoader.getNormals();
+    console.log("POS LENGTH: " + this.stemPositions.length);
+    console.log("NOR LENGTH: " + this.stemNormals.length);
+    console.log("IDX LENGTH: " + this.stemIndices.length);
+    //this.loadObjs();
     // create grammar with input axiom
-    this.grammar = new Grammar("b+", 3);
+    this.grammar = new Grammar("b[-b]+b", 2);
   }
 
   // handles turtle operations
  // construct shape from grammar 
  buildShape() {
-
-   let string = this.grammar.getGrammar();
+let string = "b";
+  // let string = this.grammar.getGrammar();
     for(let i = 0; i < string.length; i++) {
         if(string[i] == "[") {
             // increase depth of turtles
             this.depth++;
             this.turtle = this.turtleStack.addTurtle();
-            console.log("PUSH");
         } else if (string[i] == "]") {
-            console.log("POP");
             this.turtle = this.turtleStack.popTurtle();
             this.depth--;
         } else if(string[i] == "b") {
@@ -214,7 +219,6 @@ rotY() {
 
 
   create() {
-    
     this.buildShape(); // create shape from grammar
   var indices = Uint32Array.from(this.finalIndices);
   var normals = Float32Array.from(this.finalNor);

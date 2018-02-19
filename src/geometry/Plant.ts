@@ -63,18 +63,17 @@ rotY() {
 // base length and width of branch based on depth of turtle
   addBranch() {
     // modify later
-    let scaleFactor = 2;
+    let scaleFactor = 1.2;
     let length = 1.0;
     let scale = 1.0 / Math.pow(scaleFactor, this.depth);
-    console.log(scale);
     for(let i = 0; i < this.stemPositions.length; i++) {
         let transPos = vec4.fromValues(this.stemPositions[i][0], this.stemPositions[i][1], this.stemPositions[i][2], 1);
         let transNor = vec4.create();
     
         transPos = vec4.scale(transPos, transPos, scale);
-        
+        transPos[3] = 1;
         // rotate the branch positions
-        transPos = vec4.transformMat4(transPos, this.stemPositions[i], this.turtle.getRotation());
+        transPos = vec4.transformMat4(transPos, transPos, this.turtle.getRotation());
         // move base to turtle's position
         //vec4.scale(transPos, this.turtle.getOrientation(), length);
         vec4.add(transPos, transPos, this.turtle.getPos());
@@ -91,10 +90,11 @@ rotY() {
     for(let i = 0; i < this.stemIndices.length; i++) {
             this.finalIndices.push(this.stemIndices[i] + this.lastIndex);
     }
+    
     this.lastIndex += this.stemPositions.length;
 
     // move turtle to end of new branch
-    this.turtle.move(length);
+    this.turtle.move(scale);
 
     }
 
@@ -153,8 +153,8 @@ rotY() {
   // handles turtle operations
  // construct shape from grammar 
  buildShape() {
-     let string = "b+f--f+++f-f-f^ff";
-    //let string = this.grammar.getGrammar();
+    // let string = "b";
+    let string = this.grammar.getGrammar();
     for(let i = 0; i < string.length; i++) {
         if(string[i] == "[") {
             // increase depth of turtles

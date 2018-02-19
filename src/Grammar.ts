@@ -46,15 +46,15 @@ class Grammar {
         let rule: string = " ";
         if(s == "-") {
             return ["-","b", "+"];
-        } else if (s == "b") {
+        } else if (s == "b") { // branch
             rand *= this.branchMap.length;
             rule = this.branchMap[Math.floor(rand)];
         } else if (s == '+') {
             return ["-"];
-        } else if (s == "^") {
+        } else if (s == "") {
 
-        } else if (s == "f") {
-            
+        } else if (s == "f") { // leaf or flower
+            return ["f"];
         }
         // turn string into string[] and return
         let array = [];

@@ -36,6 +36,9 @@ parse(filePath: string): string {
 }
 
 load(filePath: string) {
+  this.indices = new Array();
+  this.normals =  new Array<Array<number>>();
+  this.vertices =  new Array<Array<number>>();;
   let file : string;
   file = this.parse(filePath);
   var lines = file.split("\n");

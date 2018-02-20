@@ -9,13 +9,28 @@ import Camera from './Camera';
 import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 import Plant from './geometry/Plant';
+import objLoader from './objLoader';
+
+var OBJ = require('webgl-obj-loader');
+let stem: object;
+let leaf: any;
+window.onload = function() {
+  OBJ.downloadMeshes({
+    'stem': './src/objs/stem.obj',
+    //'leaf': 'src/objs/leaf.obj'
+  }, function(s: object) {
+    stem = s;
+    console.log("set stem")
+   // leaf = l;
+    main2();
+  });
+}
 
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
-  tesselations: 5,
-  'Load Scene': loadScene, // A function pointer, essentially
-  color : [219, 10, 91],
+  // create new plant with current settings when pressed
+  'regenerate': regenerate, // A function pointer, essentially
 };
 
 let icosphere: Icosphere;
@@ -23,13 +38,24 @@ let square: Square;
 let cube: Cube;
 let plant: Plant;
 let time: number = 0;
+let loader = new objLoader(); 
 
 function loadScene() {
-  plant = new Plant(vec3.fromValues(0, 0, 0));
+  console.log("use stem");
+  plant = new Plant(vec3.fromValues(0, 0, 0), stem);
+  plant.create();
+}
+
+function regenerate() {
+  plant.destory;
   plant.create();
 }
 
 function main() {
+
+}
+
+function main2() {
   // Initial display for framerate
   const stats = Stats();
   stats.setMode(0);
@@ -40,9 +66,7 @@ function main() {
 
   // Add controls to the gui
   const gui = new DAT.GUI();
-  gui.add(controls, 'tesselations', 0, 8).step(1);
-  gui.add(controls, 'Load Scene');
-  var color = gui.addColor(controls, 'color');
+  gui.add(controls, 'regenerate');
  
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -50,6 +74,15 @@ function main() {
   if (!gl) {
     alert('WebGL 2 not supported!');
   }
+
+  /*
+  //TODO FIX TEXTURE
+  // load texture???
+  const texture = loader.loadTexture(gl, 'src/objs/birch.jpg');
+  const textureCoordBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
+  */
+
   // `setGL` is a function imported above which sets the value of `gl` in the `globals.ts` module.
   // Later, we can import `gl` from `globals.ts` to access it
   setGL(gl);
@@ -80,9 +113,7 @@ function main() {
     lambert.setTime(time);
     time++;
 
-    //set color of current shader
-    lambert.setGeometryColor(vec4.fromValues(controls.color[0]/255.0,controls.color[1]/255.0, controls.color[2]/255.0, 1.0));
-
+    
 
     stats.begin();
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);

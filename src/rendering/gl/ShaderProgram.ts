@@ -24,12 +24,14 @@ class ShaderProgram {
   attrPos: number;
   attrNor: number;
   attrCol: number;
+  attrUVs: number;
 
   unifModel: WebGLUniformLocation;
   unifModelInvTr: WebGLUniformLocation;
   unifViewProj: WebGLUniformLocation;
   unifColor: WebGLUniformLocation;
   unifTime: WebGLUniformLocation;
+  unifTexture: WebGLUniformLocation;
 
   constructor(shaders: Array<Shader>) {
     this.prog = gl.createProgram();
@@ -43,6 +45,7 @@ class ShaderProgram {
     }
 
     this.attrPos = gl.getAttribLocation(this.prog, "vs_Pos");
+    this.attrUVs = gl.getAttribLocation(this.prog, "vs_UVs");
     this.attrNor = gl.getAttribLocation(this.prog, "vs_Nor");
     this.attrCol = gl.getAttribLocation(this.prog, "vs_Col");
     this.unifModel      = gl.getUniformLocation(this.prog, "u_Model");
@@ -50,6 +53,7 @@ class ShaderProgram {
     this.unifViewProj   = gl.getUniformLocation(this.prog, "u_ViewProj");
     this.unifColor      = gl.getUniformLocation(this.prog, "u_Color");
     this.unifTime      = gl.getUniformLocation(this.prog, "u_Time");
+    this.unifTexture      = gl.getUniformLocation(this.prog, "u_Texture");
   }
 
   use() {
@@ -94,8 +98,13 @@ class ShaderProgram {
     }
   }
 
+
   draw(d: Drawable) {
     this.use();
+
+    if (this.unifTime !== -1) {
+      gl.uniform1i(this.unifTexture, 0);
+    }
 
     if (this.attrPos != -1 && d.bindPos()) {
       gl.enableVertexAttribArray(this.attrPos);
@@ -107,6 +116,11 @@ class ShaderProgram {
       gl.vertexAttribPointer(this.attrNor, 4, gl.FLOAT, false, 0, 0);
     }
 
+    if (this.attrUVs != -1 && d.bindUVs()) {
+      gl.enableVertexAttribArray(this.attrUVs);
+      gl.vertexAttribPointer(this.attrUVs, 2, gl.FLOAT, false, 0, 0);
+    }
+
     d.bindIdx();
     gl.drawElements(d.drawMode(), d.elemCount(), gl.UNSIGNED_INT, 0);
 
@@ -116,3 +130,4 @@ class ShaderProgram {
 };
 
 export default ShaderProgram;
+

@@ -24,7 +24,7 @@ class Plant extends Drawable {
   finalIndices: number[] = new Array();
   finalUVs: number[] = new Array();
 
-
+  leaf: any;
   stem: any;
   lastIndex: number = 0;
   center: vec4;
@@ -164,33 +164,29 @@ rotY() {
 
 
     
-  constructor(center: vec3, stem: any) {
+  constructor(center: vec3, stem: any, leaf: any) {
     super(); // Call the constructor of the super class. This is required.
     this.center = vec4.fromValues(center[0], center[1], center[2], 1);
     this.turtleStack = new TurtleStack();
     this.turtle = this.turtleStack.getTurtle();
     this.stem = stem;
-    let stemMesh: any = stem['stem'];
+    this.leaf = leaf;
+    let stemMesh: any = stem;
+    let leafMesh: any = leaf;
 
     for(let i: number = 0; i < stemMesh.indices.length; ++i) {
         this.stemIndices.push(this.lastIndex + stemMesh.indices[i]);
-      this.stemNormals.push([stemMesh.vertexNormals[i * 3], stemMesh.vertexNormals[i * 3 + 1], stemMesh.vertexNormals[i * 3 + 2], 0]);
-      this.stemPositions.push([stemMesh.vertices[i * 3], stemMesh.vertices[i * 3 + 1], stemMesh.vertices[i * 3 + 2], 1]);
+        this.stemNormals.push([stemMesh.vertexNormals[i * 3], stemMesh.vertexNormals[i * 3 + 1], stemMesh.vertexNormals[i * 3 + 2], 0]);
+        this.stemPositions.push([stemMesh.vertices[i * 3], stemMesh.vertices[i * 3 + 1], stemMesh.vertices[i * 3 + 2], 1]);
+      //  this.stemUVs.push([stemMesh.uvs[i * 2], stemMesh.uvs[i * 2 + 1]]);
     }
-    console.log(this.stemPositions.length);
-    /*
-    // fill stem mini-vbo data
-    this.objLoader.load("src/objs/stem.obj");
-    this.stemPositions = this.objLoader.getPositions();
-    this.stemIndices = this.objLoader.getIndices();
-    this.stemNormals = this.objLoader.getNormals();
-    this.stemUVs = this.objLoader.getUVs();
 
-    this.objLoader.load("src/objs/leaf.obj");
-    this.leafPositions = this.objLoader.getPositions();
-    this.leafIndices = this.objLoader.getIndices();
-    this.leafNormals = this.objLoader.getNormals();
-    */
+    for(let i: number = 0; i < leafMesh.indices.length; ++i) {
+        this.leafIndices.push(this.lastIndex + leafMesh.indices[i]);
+        this.leafNormals.push([leafMesh.vertexNormals[i * 3], leafMesh.vertexNormals[i * 3 + 1], leafMesh.vertexNormals[i * 3 + 2], 0]);
+        this.leafPositions.push([leafMesh.vertices[i * 3], leafMesh.vertices[i * 3 + 1], leafMesh.vertices[i * 3 + 2], 1]);
+      //  this.stemUVs.push([stemMesh.uvs[i * 2], stemMesh.uvs[i * 2 + 1]]);
+    }
     // create grammar with input axiom
     this.grammar = new Grammar("t[b]b[+b]", 2);
   }
@@ -198,8 +194,8 @@ rotY() {
   // handles turtle operations
  // construct shape from grammar 
  buildShape() {
-     let string = "t<*b";
-    // let string = "t+bf[+bf-f]bf[-bf.f]";
+     //let string = "t<*b";
+     let string = "t+bf[+bf-f]bf[-bf.f]";
     //let string = this.grammar.getGrammar();
     for(let i = 0; i < string.length; i++) {
         let rand = Math.random();

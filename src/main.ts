@@ -13,15 +13,14 @@ import objLoader from './objLoader';
 
 var OBJ = require('webgl-obj-loader');
 let stem: object;
-let leaf: any;
+let leaf: object;
 window.onload = function() {
   OBJ.downloadMeshes({
     'stem': './src/objs/stem.obj',
-    //'leaf': 'src/objs/leaf.obj'
-  }, function(s: object) {
-    stem = s;
-    console.log("set stem")
-   // leaf = l;
+    'leaf': './src/objs/leaf.obj'
+  }, function(meshes: any) {
+    stem = meshes.stem;
+    leaf = meshes.leaf;
     main2();
   });
 }
@@ -42,7 +41,7 @@ let loader = new objLoader();
 
 function loadScene() {
   console.log("use stem");
-  plant = new Plant(vec3.fromValues(0, 0, 0), stem);
+  plant = new Plant(vec3.fromValues(0, 0, 0), stem, leaf);
   plant.create();
 }
 
@@ -67,7 +66,7 @@ function main2() {
   // Add controls to the gui
   const gui = new DAT.GUI();
   gui.add(controls, 'regenerate');
- 
+
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
   const gl = <WebGL2RenderingContext> canvas.getContext('webgl2');
@@ -113,7 +112,6 @@ function main2() {
     lambert.setTime(time);
     time++;
 
-    
 
     stats.begin();
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);

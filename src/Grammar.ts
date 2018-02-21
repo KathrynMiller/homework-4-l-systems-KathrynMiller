@@ -14,27 +14,18 @@ class Grammar {
         this.axiom = a;
         this.depth = d;
         // branch expansions (mostly just slightly changed reiterations)
-        this.branchMap.push("[+>fb[+>f]b[-f]f]");
-        this.branchMap.push("[+>f[+>f]b[+>f]b[+>f]b]");
-        this.branchMap.push("[*-fbb[.-f]fb]");
-        this.branchMap.push("[*-fb[.-f]b[*-f]b[*>f]]");
-        this.branchMap.push("[*-fb[.-f]b[*-f]b[*+f]]");
-        this.branchMap.push("[-*fb[-*f]b]");
-        this.branchMap.push("[-*f[-*f]b[-*f]b]");
-        this.branchMap.push("[+<fb[--.f]fb]");
-        this.branchMap.push("[+*fb[-+.f]fb]");
-        this.branchMap.push("[*-fbf*f[.+f]fb]");
-        this.branchMap.push("[*+fbf[.+f][*-f]b[.+f]]");
-        this.branchMap.push("[*-fb[.-f]bf[*-f].b[*+f]]");
-        // leaf expansions
-        this.leafMap.push("[+f]");
-        this.leafMap.push("[.f]");
-        this.leafMap.push("[-f]");
-        this.leafMap.push("[*f]");
+          this.branchMap.push("+bf[+b>f]");
+          this.branchMap.push("-bf[+b]");
+          this.branchMap.push("*b<f[+>>f]");
+          this.branchMap.push(".bf[*bf]");
+
+        //    this.branchMap.push("+b[+b]");
+        //   this.branchMap.push("-b[+b]");
+        //   this.branchMap.push("*b[+>>]");
+        //   this.branchMap.push(".b[*b]");
+
         // initialize grammar array
-        for(let i = 0; i < this.axiom.length; i++) {
-            this.grammar.push(this.axiom[i]);
-        }
+        this.grammar = this.grammar.concat(this.axiom.split(""));
         this.expand();
     }
 
@@ -44,7 +35,7 @@ class Grammar {
             for(let i = 0; i < this.grammar.length; i++) {
                 // concatenate result of string mapping to the new grammar
                 if(this.grammar[i] == "[" || this.grammar[i] == "]") {
-                    newGrammar.push(this.grammar[i]);
+                    newGrammar = newGrammar.concat([this.grammar[i]]);
                 } else {
                     newGrammar = newGrammar.concat(this.expandString(this.grammar[i]));
                 }
@@ -56,26 +47,22 @@ class Grammar {
     // TODO: add probability mappings
     expandString(s: string) : string[] {
         let rand = Math.random();
-        let rule: string = " ";
+        let rule: string = "";
         if (s == "b") { // branch
             rand *= this.branchMap.length;
             rule = this.branchMap[Math.floor(rand)];
         } else if (s == "f") { // leaf or flower
-            rand *= this.leafMap.length;
-            rule = this.leafMap[Math.floor(rand)];
+           // return["f"];
+           // rand *= this.leafMap.length;
+           // rule = this.leafMap[Math.floor(rand)];
         } else if (s == "t") { // trunk, just pass down linearly
             return ["t"];
         }
-        // turn string into string[] and return
-        let array = [];
-        for(let i = 0; i < rule.length; i++) {
-            array.push(rule.charAt(i));
-        }
-        return array;
+        return rule.split("");
     }
 
     getGrammar(): string[] {
-        return  this.grammar;
+        return this.grammar;
     }
 
 }

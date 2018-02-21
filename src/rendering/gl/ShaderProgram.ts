@@ -97,13 +97,18 @@ class ShaderProgram {
       gl.uniform1f(this.unifTime, time);
     }
   }
-
-
+  setTexture() {
+  //TODO FIX TEXTURE
+  this.use();
+    if (this.unifTexture !== -1) {
+      gl.uniform1i(this.unifTexture, 0);
+    }
+  }
   draw(d: Drawable) {
     this.use();
 
-    if (this.unifTime !== -1) {
-      gl.uniform1i(this.unifTexture, 0);
+    if (this.unifTexture !== -1) {
+      
     }
 
     if (this.attrPos != -1 && d.bindPos()) {

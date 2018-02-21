@@ -36,29 +36,6 @@ class Plant extends Drawable {
   grammar: Grammar;
   objLoader: objLoader = new objLoader();
 
-// set of functions to map grammar to
-//TODO add randomness to rotations 
-  mapMinus() {
-      
-  }
-
-  mapPlus() {
-    let rand = Math.random();
-    if(rand < .5) {
-        this.turtle.rotate(30, 1, 0, 0);
-      } else {
-        this.turtle.rotate(30, 0, 0, 1);
-      } 
-}
-// only use rotY after an x or z rotation to avoid weird twisted overlapping line
-rotY() {
-    let rand = Math.random();
-      if(rand < .5) {
-        this.turtle.rotate(-30, 0, 1, 0);
-      } else{
-        this.turtle.rotate(30, 0, 1, 0);
-      }
-}
 // base length and width of branch based on depth of turtle
   addBranch() {
         let scaleFactor = 1.2;
@@ -70,12 +47,7 @@ rotY() {
         
             transPos = vec4.scale(transPos, transPos, scale);
             transPos[3] = 1;
-            // rotate the branch positions
-            transPos = vec4.transformMat4(transPos, transPos, this.turtle.getRotation());
-            // move base to turtle's position
-            vec4.add(transPos, transPos, this.turtle.getPos());
-            transPos[3] = 1;
-
+            transPos = vec4.transformMat4(transPos, transPos, this.turtle.getTotalTrans());
             // rotate normals based on turtle rotation
             transNor = vec4.transformMat4(transNor, this.stemNormals[i], this.turtle.getRotation());
 
@@ -85,7 +57,7 @@ rotY() {
         }
         // adjust indices and add to final list
         for(let i = 0; i < this.stemIndices.length; i++) {
-                this.finalIndices.push(this.stemIndices[i] + this.lastIndex);
+            this.finalIndices.push(this.stemIndices[i] + this.lastIndex);
         }
         this.lastIndex += this.stemPositions.length;
 
@@ -95,8 +67,8 @@ rotY() {
         }
 
         // move turtle to end of new branch
+        //this.turtle.setScale(scale);
         this.turtle.move(scale);
-
     }
 
     // similar logic to add branch
@@ -109,7 +81,7 @@ rotY() {
             // rotate the leaf positions
             transPos = vec4.transformMat4(transPos, this.leafPositions[i], this.turtle.getRotation());
             // move base to turtle's position
-            //vec4.scale(transPos, this.turtle.getOrientation(), length);
+
             vec4.add(transPos, transPos, this.turtle.getPos());
             transPos[3] = 1;
 
@@ -127,6 +99,7 @@ rotY() {
         this.lastIndex += this.leafPositions.length;
 
         // move turtle to end of new branch
+        //this.turtle.setScale(.3);
         this.turtle.move(length);
     }
 
@@ -134,15 +107,11 @@ rotY() {
         let scale = 1.5;
         for(let i = 0; i < this.stemPositions.length; i++) {
             let transPos = vec4.fromValues(this.stemPositions[i][0], this.stemPositions[i][1], this.stemPositions[i][2], 1);
-            let transNor = vec4.create();
+            let transNor = vec4.fromValues(this.stemNormals[i][0], this.stemNormals[i][1], this.stemNormals[i][2], 0);
         
             transPos = vec4.scale(transPos, transPos, scale);
             transPos[3] = 1;
-
-            // move base to turtle's position
-            vec4.add(transPos, transPos, this.turtle.getPos());
-            transPos[3] = 1;
-            transNor = vec4.fromValues(this.stemNormals[i][0], this.stemNormals[i][1], this.stemNormals[i][2], 0);
+            transPos = vec4.transformMat4(transPos, transPos, this.turtle.getTotalTrans());
 
             // add transformed positions and normals to the final set of positions
             this.finalPos = this.finalPos.concat([transPos[0], transPos[1], transPos[2], transPos[3]]);
@@ -158,6 +127,7 @@ rotY() {
             this.finalUVs.push(this.stemUVs[i][1]);
         }
         // move turtle to end of new branch
+      //  this.turtle.setScale(scale);
         this.turtle.move(scale);
     }
 
@@ -178,27 +148,27 @@ rotY() {
         this.stemIndices.push(this.lastIndex + stemMesh.indices[i]);
         this.stemNormals.push([stemMesh.vertexNormals[i * 3], stemMesh.vertexNormals[i * 3 + 1], stemMesh.vertexNormals[i * 3 + 2], 0]);
         this.stemPositions.push([stemMesh.vertices[i * 3], stemMesh.vertices[i * 3 + 1], stemMesh.vertices[i * 3 + 2], 1]);
-      //  this.stemUVs.push([stemMesh.uvs[i * 2], stemMesh.uvs[i * 2 + 1]]);
+        this.stemUVs.push([stemMesh.textures[i * 2], stemMesh.textures[i * 2 + 1]]);
     }
 
     for(let i: number = 0; i < leafMesh.indices.length; ++i) {
         this.leafIndices.push(this.lastIndex + leafMesh.indices[i]);
         this.leafNormals.push([leafMesh.vertexNormals[i * 3], leafMesh.vertexNormals[i * 3 + 1], leafMesh.vertexNormals[i * 3 + 2], 0]);
         this.leafPositions.push([leafMesh.vertices[i * 3], leafMesh.vertices[i * 3 + 1], leafMesh.vertices[i * 3 + 2], 1]);
-      //  this.stemUVs.push([stemMesh.uvs[i * 2], stemMesh.uvs[i * 2 + 1]]);
     }
     // create grammar with input axiom
-    this.grammar = new Grammar("t[b]b[+b]", 2);
+     this.grammar = new Grammar("t[.b][+b][*b]", 3);
   }
 
   // handles turtle operations
  // construct shape from grammar 
  buildShape() {
-     //let string = "t<*b";
-     let string = "t+bf[+bf-f]bf[-bf.f]";
-    //let string = this.grammar.getGrammar();
+    // let string = "t<*b";
+    //let string = "t+b[+b]b[-b]";
+   //let string = "t+bf[+bf-f]bf[-bf.f]";
+     let string = this.grammar.getGrammar();
     for(let i = 0; i < string.length; i++) {
-        let rand = Math.random();
+        // let rand = Math.random();
         if(string[i] == "[") {
             // increase depth of turtles
             this.depth++;

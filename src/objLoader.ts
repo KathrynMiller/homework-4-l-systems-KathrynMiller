@@ -14,8 +14,6 @@ class objLoader {
 
   }
 
-
-  
 parse(filePath: string): string {
   let file: string = " ";
   var rawFile = new XMLHttpRequest();
@@ -88,6 +86,7 @@ getPositions(): number[][] {
 getUVs(): number[][] {
   return this.uvs;
 }
+
 // texture loading from
 // https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/Tutorial/Using_textures_in_WebGL
 
@@ -136,7 +135,6 @@ loadTexture(gl: WebGL2RenderingContext, url: string) {
 
   return texture;
 }
-
 
 
 }

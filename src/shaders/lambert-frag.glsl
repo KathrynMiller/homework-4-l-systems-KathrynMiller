@@ -29,7 +29,7 @@ void main()
 {
     // Material base color (before shading)
         vec4 diffuseColor = vec4(1, 1, 1, 1);
-       // diffuseColor = texture2D(u_Texture, fs_UV);
+        //diffuseColor = texture2D(u_Texture, fs_UV);
 
         // Calculate the diffuse term for Lambert shading
         float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));

@@ -19,20 +19,46 @@ in vec4 fs_Nor;
 in vec4 fs_LightVec;
 in vec4 fs_Col;
 uniform float u_Time;
+in vec4 fs_Pos;
 uniform sampler2D u_Texture;
 in vec2 fs_UV;
 
+vec4 baseCol = vec4(0, 0, 0, 1);
+vec4 leafCol = vec4(1, 0, 0, 1);
+
 out vec4 out_Col; // This is the final output color that you will see on your
                   // screen for the pixel that is currently being processed.
+float fbm(const in vec2 uv);
+float noise(in vec2 uv);
 
 void main()
 {
     // Material base color (before shading)
-        vec4 diffuseColor = vec4(1, 1, 1, 1);
+        vec4 normal = fs_Nor;
+        vec4 diffuseColor;
+        if(fs_UV.x == 2.0) {
+            diffuseColor = baseCol;
+        } else if (fs_UV.x == 3.0) {
+            diffuseColor == leafCol;
+        } else {
+            float height = fbm(vec2(fs_UV.x / 2.0, fs_UV.y * 3.0));
+            diffuseColor = vec4(.8, .8, .8, 1) * height;
+            height = abs(height);
+            if(height > .75) {
+                diffuseColor = vec4(0.0, 0, 0, 1);
+            } else if (height > .56 ){
+                diffuseColor = vec4(1.0);
+                normal.y *= noise(vec2(normal.xy));
+            } else {
+                diffuseColor = vec4(.3, .3, .3, 1);
+                diffuseColor = vec4(1.0);
+            }
+            
+        }
         //diffuseColor = texture2D(u_Texture, fs_UV);
 
         // Calculate the diffuse term for Lambert shading
-        float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
+        float diffuseTerm = dot(normalize(normal), normalize(fs_LightVec));
         // Avoid negative lighting values
         // diffuseTerm = clamp(diffuseTerm, 0, 1);
 
@@ -44,4 +70,40 @@ void main()
 
         // Compute final shaded color
         out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
+}
+
+vec2 smoothF(vec2 uv)
+{
+    return uv*uv*(3.-2.*uv);
+}
+
+float noise(in vec2 uv)
+{
+    const float k = 257.;
+    vec4 l  = vec4(floor(uv),fract(uv));
+    float u = l.x + l.y * k;
+    vec4 v  = vec4(u, u+1.,u+k, u+k+1.);
+    v       = fract(fract(1.23456789*v)*v/.987654321);
+    l.zw    = smoothF(l.zw);
+    l.x     = mix(v.x, v.y, l.z);
+    l.y     = mix(v.z, v.w, l.z);
+    return    mix(l.x, l.y, l.w);
+}
+
+float fbm(const in vec2 uv)
+{
+    float a = 0.6;
+    float f = 8.0;
+    float n = 0.;
+    int it = 8;
+    for(int i = 0; i < 320; i++)
+    {
+        if(i<it)
+        {
+            n += noise(uv*f)*a;
+            a *= .5;
+            f *= 2.;
+        }
+    }
+    return n;
 }

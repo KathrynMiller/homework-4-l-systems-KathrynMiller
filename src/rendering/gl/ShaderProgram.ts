@@ -45,7 +45,7 @@ class ShaderProgram {
     }
 
     this.attrPos = gl.getAttribLocation(this.prog, "vs_Pos");
-    this.attrUVs = gl.getAttribLocation(this.prog, "vs_UVs");
+    this.attrUVs = gl.getAttribLocation(this.prog, "vs_UV");
     this.attrNor = gl.getAttribLocation(this.prog, "vs_Nor");
     this.attrCol = gl.getAttribLocation(this.prog, "vs_Col");
     this.unifModel      = gl.getUniformLocation(this.prog, "u_Model");

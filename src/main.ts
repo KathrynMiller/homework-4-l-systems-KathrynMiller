@@ -28,18 +28,24 @@ window.onload = function() {
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
-  'axiom' : "b",
+  'axiom' : "t[.b][+b][*b]",
+  'iterations': 2,
 };
 
 let icosphere: Icosphere;
 let square: Square;
-let cube: Cube;
+let base: Cube;
 let plant: Plant;
 let time: number = 0;
 
+
 function loadScene() {
-  plant = new Plant(vec3.fromValues(0, 0, 0), stem, leaf);
+  plant = new Plant(vec3.fromValues(0, 0, 0), stem, leaf, "t[.b][+b][*b]", 2);
   plant.create();
+  // modified cube to be plant base
+  base = new Cube(vec3.fromValues(0, 0, 0));
+  base.create();
+
 }
 
 
@@ -107,7 +113,8 @@ function main2() {
 
   // Add controls to the gui
   const gui = new DAT.GUI();
- gui.add(controls, 'axiom');
+ var axiom = gui.add(controls, 'axiom');
+ var iterations = gui.add(controls, 'iterations', 0, 5).step(1);
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -127,7 +134,7 @@ function main2() {
   // Initial call to load scene
  // loadScene();
 
-  const camera = new Camera(vec3.fromValues(0, 0, 5), vec3.fromValues(0, 0, 0));
+  const camera = new Camera(vec3.fromValues(0, 2, 8), vec3.fromValues(0, 0, 0));
 
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(0.2, 0.2, 0.2, 1);
@@ -150,6 +157,15 @@ function main2() {
     lambert.setTime(time);
     time++;
 
+    iterations.onChange(function() {
+      plant.regenerate(iterations.getValue(), axiom.getValue());
+    }) 
+
+    axiom.onChange(function() {
+      plant.regenerate(iterations.getValue(), axiom.getValue());
+    }) 
+
+    
 
     stats.begin();
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
@@ -157,6 +173,7 @@ function main2() {
   
     renderer.render(camera, lambert, [
        plant,
+       base, 
     ]);
     stats.end();
 

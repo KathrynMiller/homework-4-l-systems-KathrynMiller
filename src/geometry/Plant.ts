@@ -7,16 +7,6 @@ import Cube from './Cube';
 import TurtleStack from '../TurtleStack';
 
 class Plant extends Drawable {
-
-  // used when modifying obj attributes of a stem 
-  stemIndices: number[] = new Array();
-  stemPositions: number[][] = new Array<Array<number>>();
-  stemNormals: number[][] = new Array<Array<number>>();
-  stemUVs: number[][] = new Array<Array<number>>();
-  // single leaf attributes
-  leafIndices: number[] = new Array();
-  leafPositions: number[][] = new Array<Array<number>>();
-  leafNormals: number[][] = new Array<Array<number>>();
   // final vbo arrays
   finalPos: number[] = new Array();
   finalNor: number[] = new Array();
@@ -36,94 +26,55 @@ class Plant extends Drawable {
 
 
 // base length and width of branch based on depth of turtle
-  addBranch() {
-    let scaleFactor = 1.2;
-    let length = 1.0;
-    let scale = 1.0 / Math.pow(scaleFactor, this.depth);
-    for(let i = 0; i < this.stemPositions.length; i++) {
-        let transPos = vec4.fromValues(this.stemPositions[i][0], this.stemPositions[i][1], this.stemPositions[i][2], 1);
-        let transNor = vec4.create();
+  addBranch(scale: number) {
+    for(let i = 0; i < this.stem.vertices.length; i+=3) {
+        let transPos = vec4.fromValues(this.stem.vertices[i], this.stem.vertices[i+ 1], this.stem.vertices[i + 2], 1);
+        let transNor = vec4.fromValues(this.stem.vertexNormals[i], this.stem.vertexNormals[i + 1], this.stem.vertexNormals[i + 2], 0);
     
         transPos = vec4.scale(transPos, transPos, scale);
         transPos[3] = 1;
         transPos = vec4.transformMat4(transPos, transPos, this.turtle.getTotalTrans());
         // rotate normals based on turtle rotation
-        transNor = vec4.transformMat4(transNor, this.stemNormals[i], this.turtle.getRotation());
+        transNor = vec4.transformMat4(transNor, transNor, this.turtle.getRotation());
 
         // add transformed positions and normals to the final set of positions
-        this.finalPos = this.finalPos.concat([transPos[0], transPos[1], transPos[2], transPos[3]]);
-        this.finalNor = this.finalNor.concat([transNor[0], transNor[1], transNor[2], transNor[3]]);
+        this.finalPos = this.finalPos.concat([transPos[0], transPos[1], transPos[2], 1]);
+        this.finalNor = this.finalNor.concat([transNor[0], transNor[1], transNor[2], 0]);
     }
-    // adjust indices and add to final list
-    for(let i = 0; i < this.stemIndices.length; i++) {
-        this.finalIndices.push(this.stemIndices[i] + this.lastIndex);
+    for(let i = 0; i < this.stem.textures.length; i+=2) {
+        this.finalUVs.push(this.stem.textures[i]);
+        this.finalUVs.push(this.stem.textures[i + 1]);
     }
-    this.lastIndex += this.stemPositions.length;
-
-    for(let i = 0; i < this.stemUVs.length; i++) {
-        this.finalUVs.push(this.stemUVs[i][0]);
-        this.finalUVs.push(this.stemUVs[i][1]);
+    for(let i = 0; i < this.stem.indices.length; i++) {
+        this.finalIndices = this.finalIndices.concat([this.stem.indices[i] + this.lastIndex]);
     }
+    this.lastIndex += this.stem.vertices.length / 3;
     this.turtle.move(scale);
     }
 
     // similar logic to add branch
     addLeaf() {
     let length = .3;
-    for(let i = 0; i < this.leafPositions.length; i++) {
-        let transPos = vec4.fromValues(this.leafPositions[i][0], this.leafPositions[i][1], this.leafPositions[i][2], 1);
-        let transNor = vec4.create();
+    for(let i = 0; i < this.leaf.vertices.length; i+=3) {
+        let transPos = vec4.fromValues(this.leaf.vertices[i], this.leaf.vertices[i+ 1], this.leaf.vertices[i + 2], 1);
+        let transNor = vec4.fromValues(this.leaf.vertexNormals[i], this.leaf.vertexNormals[i + 1], this.leaf.vertexNormals[i + 2], 0);
 
         transPos = vec4.transformMat4(transPos, transPos, this.turtle.getTotalTrans());
         // rotate normals based on turtle rotation
-        transNor = vec4.transformMat4(transNor, this.leafNormals[i], this.turtle.getRotation());
+        transNor = vec4.transformMat4(transNor, transNor, this.turtle.getRotation());
 
         // add transformed positions and normals to the final set of positions
         this.finalPos = this.finalPos.concat([transPos[0], transPos[1], transPos[2], transPos[3]]);
         this.finalNor = this.finalNor.concat([transNor[0], transNor[1], transNor[2], transNor[3]]);
+        this.finalUVs.push(3);
+        this.finalUVs.push(3);
     }
-    // adjust indices and add to final list
-    for(let i = 0; i < this.leafIndices.length; i++) {
-        this.finalIndices.push(this.leafIndices[i] + this.lastIndex);
+    for(let i = 0; i < this.leaf.indices.length; i++) {
+        this.finalIndices = this.finalIndices.concat([this.leaf.indices[i] + this.lastIndex]);
     }
-    this.lastIndex += this.leafPositions.length;
-
-    for(let i = 0; i < this.leafPositions.length; i++) {
-        this.finalUVs.push(3.0);
-        this.finalUVs.push(3.0);
-    }
+    this.lastIndex += this.leaf.vertices.length / 3;
     this.turtle.move(length);
     }
-
-    trunk() {
-        let scale = 1.5;
-        for(let i = 0; i < this.stemPositions.length; i++) {
-            let transPos = vec4.fromValues(this.stemPositions[i][0], this.stemPositions[i][1], this.stemPositions[i][2], 1);
-            let transNor = vec4.fromValues(this.stemNormals[i][0], this.stemNormals[i][1], this.stemNormals[i][2], 0);
-        
-            transPos = vec4.scale(transPos, transPos, scale);
-            transPos[3] = 1;
-            transPos = vec4.transformMat4(transPos, transPos, this.turtle.getTotalTrans());
-
-            // add transformed positions and normals to the final set of positions
-            this.finalPos = this.finalPos.concat([transPos[0], transPos[1], transPos[2], transPos[3]]);
-            this.finalNor = this.finalNor.concat([transNor[0], transNor[1], transNor[2], transNor[3]]);
-        }
-        // adjust indices and add to final list
-        for(let i = 0; i < this.stemIndices.length; i++) {
-            this.finalIndices.push(this.stemIndices[i] + this.lastIndex);
-        }
-        this.lastIndex += this.stemPositions.length;
-        for(let i = 0; i < this.stemUVs.length; i++) {
-            this.finalUVs.push(this.stemUVs[i][0]);
-            this.finalUVs.push(this.stemUVs[i][1]);
-        }
-        // move turtle to end of new branch
-      //  this.turtle.setScale(scale);
-        this.turtle.move(scale);
-    }
-
-
 
     
   constructor(center: vec3, stem: any, leaf: any, axiom: string, i: number) {
@@ -133,21 +84,7 @@ class Plant extends Drawable {
     this.turtle = this.turtleStack.getTurtle();
     this.stem = stem;
     this.leaf = leaf;
-    let stemMesh: any = stem;
-    let leafMesh: any = leaf;
 
-    for(let i: number = 0; i < stemMesh.indices.length; ++i) {
-          this.stemIndices.push(stemMesh.indices[i]);
-          this.stemNormals.push([stemMesh.vertexNormals[i * 3], stemMesh.vertexNormals[i * 3 + 1], stemMesh.vertexNormals[i * 3 + 2], 0]);
-          this.stemPositions.push([stemMesh.vertices[i * 3], stemMesh.vertices[i * 3 + 1], stemMesh.vertices[i * 3 + 2], 1]);
-          this.stemUVs.push([stemMesh.textures[i * 2], stemMesh.textures[i * 2 + 1]]);
-    }
-    
-    for(let i: number = 0; i < leafMesh.indices.length; ++i) {
-        this.leafIndices.push(this.lastIndex + leafMesh.indices[i]);
-        this.leafNormals.push([leafMesh.vertexNormals[i * 3], leafMesh.vertexNormals[i * 3 + 1], leafMesh.vertexNormals[i * 3 + 2], 0]);
-        this.leafPositions.push([leafMesh.vertices[i * 3], leafMesh.vertices[i * 3 + 1], leafMesh.vertices[i * 3 + 2], 1]);
-    }
     // create grammar with input axiom
      this.grammar = new Grammar(axiom, i);
   }
@@ -155,8 +92,10 @@ class Plant extends Drawable {
   // handles turtle operations
  // construct shape from grammar 
  buildShape() {
-     let string = this.grammar.getGrammar();
+    let string = this.grammar.getGrammar();
     for(let i = 0; i < string.length; i++) {
+        let scaleFactor = 1.2;
+        let scale = 1.0 / Math.pow(scaleFactor, this.depth);
         if(string[i] == "[") {
             // increase depth of turtles
             this.depth++;
@@ -165,7 +104,7 @@ class Plant extends Drawable {
             this.turtle = this.turtleStack.popTurtle();
             this.depth--;
         } else if(string[i] == "b") {
-            this.addBranch();
+            this.addBranch(scale);
         } else if (string[i] == "f") {
             this.addLeaf();
         } else if (string[i] == "-") {
@@ -181,7 +120,7 @@ class Plant extends Drawable {
         } else if (string[i] == ".") {
             this.turtle.rotate(30, 0, 0, 1);
         } else if (string[i] == "t") {
-            this.trunk();
+            this.addBranch(1.5);
         }
     }
 
@@ -193,6 +132,10 @@ class Plant extends Drawable {
     this.turtleStack = new TurtleStack();
     this.turtle = this.turtleStack.getTurtle();
     this.grammar = new Grammar(axiom, iterations);
+   // this.finalPos = new Array();
+   // this.finalNor = new Array();
+  //  this.finalUVs = new Array();
+  //  this.finalIndices = new Array();
     this.create();
  }
 

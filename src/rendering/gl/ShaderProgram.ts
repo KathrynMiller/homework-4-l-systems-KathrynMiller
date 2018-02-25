@@ -131,6 +131,7 @@ class ShaderProgram {
 
     if (this.attrPos != -1) gl.disableVertexAttribArray(this.attrPos);
     if (this.attrNor != -1) gl.disableVertexAttribArray(this.attrNor);
+    if (this.attrUVs != -1) gl.disableVertexAttribArray(this.attrUVs);
   }
 };
 

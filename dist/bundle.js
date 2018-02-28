@@ -3427,7 +3427,7 @@ let base;
 let plant;
 let time = 0;
 function loadScene() {
-    plant = new __WEBPACK_IMPORTED_MODULE_8__geometry_Plant__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* vec3 */].fromValues(0, 0, 0), stem, leaf, "t[.b][+b][*b]", 2, .3);
+    plant = new __WEBPACK_IMPORTED_MODULE_8__geometry_Plant__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* vec3 */].fromValues(0, 0, 0), stem, leaf, "t[.b][+b][*b]", 2, 30);
     plant.create();
     // modified cube to be plant base
     base = new __WEBPACK_IMPORTED_MODULE_3__geometry_Cube__["a" /* default */](__WEBPACK_IMPORTED_MODULE_0_gl_matrix__["b" /* vec3 */].fromValues(0, 0, 0));
@@ -15356,7 +15356,7 @@ class Plant extends __WEBPACK_IMPORTED_MODULE_1__rendering_gl_Drawable__["a" /* 
         this.stem = stem;
         this.leaf = leaf;
         //this.leafSize = leafSize;
-        this.degree = (degree * 180.0 / Math.PI);
+        this.degree = degree;
         // create grammar with input axiom
         this.grammar = new __WEBPACK_IMPORTED_MODULE_3__Grammar__["a" /* default */](axiom, i);
     }

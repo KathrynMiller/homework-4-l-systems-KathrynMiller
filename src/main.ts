@@ -41,7 +41,7 @@ let time: number = 0;
 
 
 function loadScene() {
-  plant = new Plant(vec3.fromValues(0, 0, 0), stem, leaf, "t[.b][+b][*b]", 2, .3);
+  plant = new Plant(vec3.fromValues(0, 0, 0), stem, leaf, "t[.b][+b][*b]", 2, 30);
   plant.create();
   // modified cube to be plant base
   base = new Cube(vec3.fromValues(0, 0, 0));

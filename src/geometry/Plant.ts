@@ -88,7 +88,7 @@ class Plant extends Drawable {
     this.stem = stem;
     this.leaf = leaf;
     //this.leafSize = leafSize;
-    this.degree = (degree * 180.0 / Math.PI);
+    this.degree = degree;
     // create grammar with input axiom
      this.grammar = new Grammar(axiom, i);
   }

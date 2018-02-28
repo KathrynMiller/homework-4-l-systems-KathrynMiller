@@ -19,11 +19,6 @@ class Grammar {
           this.branchMap.push("*b<f[+>>f]");
           this.branchMap.push(".bf[*bf]");
 
-        //    this.branchMap.push("+b[+b]");
-        //   this.branchMap.push("-b[+b]");
-        //   this.branchMap.push("*b[+>>]");
-        //   this.branchMap.push(".b[*b]");
-
         // initialize grammar array
         this.grammar = this.grammar.concat(this.axiom.split(""));
         this.expand();
@@ -44,17 +39,12 @@ class Grammar {
         }
     }
 
-    // TODO: add probability mappings
     expandString(s: string) : string[] {
         let rand = Math.random();
         let rule: string = "";
         if (s == "b") { // branch
             rand *= this.branchMap.length;
             rule = this.branchMap[Math.floor(rand)];
-        } else if (s == "f") { // leaf or flower
-           // return["f"];
-           // rand *= this.leafMap.length;
-           // rule = this.leafMap[Math.floor(rand)];
         } else if (s == "t") { // trunk, just pass down linearly
             return ["t"];
         }

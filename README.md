@@ -1,88 +1,25 @@
-# Homework 4: L-systems
+Kathryn Miller
 
-For this assignment, you will design a set of formal grammar rules to create
-a plant life using an L-system program. Once again, you will work from a
-Typescript / WebGL 2.0 base code like the one you used in homework 0. You will
-implement your own set of classes to handle the L-system grammar expansion and
-drawing. You will rasterize your L-system using faceted geometry. Feel free
-to use ray marching to generate an interesting background, but trying to
-raymarch an entire L-system will take too long to render!
+Implementation:
 
-## L-System Components
-The way you implement your L-System is ultimately up to you, but we recommend
-creating the following classes / constructs to help you instantiate, expand, and
-draw your grammars:
-* Some sort of expandable collection of string characters. You might implement
-a linked list data structure, or you might use a basic Javascript array (which
-is resizeable).
-* Some sort of class to represent a Rule for expanding a character into a
-string. You might consider creating a map within each Rule that maps
-probabilities to strings, so that a Rule can represent multiple possible
-expansions for a character with different probabilities.
-* A second Rule-style class that dictates what drawing operation should be
-performed when a character is parsed during the drawing process. This should
-also be a map of probabilities, but this time the values in the map will be
-functions rather than strings. Invoke a given function, e.g. `drawBranch`, when
-a character is parsed.
-* A Turtle class that lets you keep track of, at minimum, a position, an
-orientation, and a depth. You should also create a stack onto which you can push
-and pop turtle states.
-* A class in which to store the VBOs that will represent __all__ of your faceted
-geometry. __Do not draw individual mesh components one at a time. This will
-cause your program to render very slowly.__ Instead, expand lists of vertex
-information as you "draw" your grammar, and push all VBO data to the GPU at once
-after you've finished parsing your entire string for drawing.
+In order to build my L-System I created a turtle class, a turtlestack class (just for ease of keeping track of turtles), a grammar class, and a Plant class which put my entire L-System together. The turtle class keeps track of its own position and orientation it is facing and is able to move along its orientation vector. I also currently have my turtle including a total rotation matrix as well as a totalTranslation matrix, both from different tactics I was trying in attempting to get my branches to rotate correctly (my turtle class is thus more verbose than it probably had to be because I struggled to get my rotations working). 
 
-## OBJ loading
-So that you can more easily generate interesting-looking plants, we ask that you
-enable your program to import OBJ files and store their information in VBOs. You
-can either implement your own OBJ parser, or use an OBJ-loading package via NPM:
+My plant class is what essentially put the tree together. I maintained arrays of final vbo data that I appended individual transformed branch or leaf data to. I obtained the individual branch and leaf data through use of this obj loader ->[https://github.com/frenchtoast747/webgl-obj-loader]. Each time I encountered a "b" in my grammar string, I would transform a branch by the turtles current position and orientation then move the turtle along the length of the scaled branch. Calculating the distance to move was easy since I had my default branch length set to 1, so the distance moved was always just the amount I scaled the branch by. Similarly, each time I encountered an "f", I would draw a leaf. All other grammar characters corresponded to modifications in my turtle's orientation and position. Once I was through the entire grammar I passed my final vbos to be drawn.
 
-[obj-mtl-loader](https://www.npmjs.com/package/obj-mtl-loader)
+Grammar Rules: 
 
-[webgl-obj-loader](https://www.npmjs.com/package/webgl-obj-loader)
+My grammar class simply had a dictionary of rules and expanded a given axiom. I chose my rules by drawing out the shape I wanted my birch tree to have. To create a trunk I made "t" just represent a branch drawn at a set scale of 1.5 and the character "t" just expanded to itself to guarantee that it would continually be passed down at the beginning of the grammar. The rest of my grammar rules were created with the intent of having each branch junction look roughly like this:
+		|/
+	   \|
+		|
+
+and then I just modified the rotation symbols of the intial rule to create variation. Although my rotations are set based on the input angle, I varied them by 5 degrees in each direction by choosing a random number r, multiplying it by 10 and subtracting 5. I then applied the modified random number to the input angle to get slight changes in rotation so that each branch didn't have the same exact angle.
 
 
-## Aesthetic Requirements
-Your plant must have the following attributes:
-* It must grow in 3D
-* It must have flowers, leaves, or some other branch decoration in addition to
-basic branch geometry
-* Organic variation (i.e. noise or randomness in grammar expansion)
-* A flavorful twist. Don't just make a basic variation on the example broccoli
-grammar from the slides! Create a plant that is unique to you!
+The texture on the birch trees is done by inputing the branch's stretched uv coordinates to an fbm function. I then played around with values such that any point that generated an fbm value, f, above a certain threshold value would be drawn black. If you look closely there is also variation in the white part of the trunk but I had trouble getting it to look more like carved bark.
 
-Feel free to use the resources linked in the slides for inspiration!
+[![](tree1.png)]
 
-## Interactivity
-Using dat.GUI, make at least three aspects of your demo an interactive variable.
-For example, you could modify:
+[![](tree2.png)]
 
-* The axiom
-* Your input grammar rules and their probability
-* The angle of rotation of the turtle
-* The size or color or material of the cylinder the turtle draws
-
-Don't feel restricted to these examples; make any attributes adjustable that you
-want!
-
-## Examples from last year (Click to go to live demo)
-
-Andrea Lin:
-
-[![](andreaLin.png)](http://andrea-lin.com/Project3-LSystems/)
-
-Tabatha Hickman:
-
-[![](tabathaHickman.png)](https://tabathah.github.io/Project3-LSystems/)
-
-Joe Klinger:
-
-[![](joeKlinger.png)](https://klingerj.github.io/Project3-LSystems/)
-
-## Extra Credit (Up to 20 points)
-For bonus points, add functionality to your L-system drawing that ensures
-geometry will never overlap. In other words, make your plant behave like a
-real-life plant so that its branches and other components don't compete for the
-same space. The more complex you make your L-system self-interaction, the more
-points you'll earn.
+[![](tree3.png)]

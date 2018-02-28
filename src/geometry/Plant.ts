@@ -13,6 +13,8 @@ class Plant extends Drawable {
   finalIndices: number[] = new Array();
   finalUVs: number[] = new Array();
 
+  degree: number;
+  //leafSize: number;
   leaf: any;
   stem: any;
   lastIndex: number = 0;
@@ -55,10 +57,11 @@ class Plant extends Drawable {
     // similar logic to add branch
     addLeaf() {
     let length = .3;
+    console.log(length);
     for(let i = 0; i < this.leaf.vertices.length; i+=3) {
         let transPos = vec4.fromValues(this.leaf.vertices[i], this.leaf.vertices[i+ 1], this.leaf.vertices[i + 2], 1);
         let transNor = vec4.fromValues(this.leaf.vertexNormals[i], this.leaf.vertexNormals[i + 1], this.leaf.vertexNormals[i + 2], 0);
-
+        
         transPos = vec4.transformMat4(transPos, transPos, this.turtle.getTotalTrans());
         // rotate normals based on turtle rotation
         transNor = vec4.transformMat4(transNor, transNor, this.turtle.getRotation());
@@ -66,25 +69,26 @@ class Plant extends Drawable {
         // add transformed positions and normals to the final set of positions
         this.finalPos = this.finalPos.concat([transPos[0], transPos[1], transPos[2], transPos[3]]);
         this.finalNor = this.finalNor.concat([transNor[0], transNor[1], transNor[2], transNor[3]]);
-        this.finalUVs.push(3);
-        this.finalUVs.push(3);
+         this.finalUVs.push(3);
+         this.finalUVs.push(3);
     }
     for(let i = 0; i < this.leaf.indices.length; i++) {
         this.finalIndices = this.finalIndices.concat([this.leaf.indices[i] + this.lastIndex]);
     }
     this.lastIndex += this.leaf.vertices.length / 3;
-    this.turtle.move(length);
+    this.turtle.move(.3);
     }
 
     
-  constructor(center: vec3, stem: any, leaf: any, axiom: string, i: number) {
+  constructor(center: vec3, stem: any, leaf: any, axiom: string, i: number, degree: number) {
     super(); // Call the constructor of the super class. This is required.
     this.center = vec4.fromValues(center[0], center[1], center[2], 1);
     this.turtleStack = new TurtleStack();
     this.turtle = this.turtleStack.getTurtle();
     this.stem = stem;
     this.leaf = leaf;
-
+    //this.leafSize = leafSize;
+    this.degree = (degree * 180.0 / Math.PI);
     // create grammar with input axiom
      this.grammar = new Grammar(axiom, i);
   }
@@ -108,35 +112,22 @@ class Plant extends Drawable {
         } else if (string[i] == "f") {
             this.addLeaf();
         } else if (string[i] == "-") {
-            this.turtle.rotate(-30, 1, 0, 0);
+            this.turtle.rotate(-this.degree, 1, 0, 0);
         } else if (string[i] == "+") {
-           this.turtle.rotate(30, 1, 0, 0);
+           this.turtle.rotate(this.degree, 1, 0, 0);
         } else if (string[i] == ">") {
-            this.turtle.rotate(30, 0, 1, 0);
+            this.turtle.rotate(this.degree, 0, 1, 0);
         } else if (string[i] == "<") {
-            this.turtle.rotate(-30, 0, 1, 0);
+            this.turtle.rotate(-this.degree, 0, 1, 0);
         } else if (string[i] == "*") {
-            this.turtle.rotate(-30, 0, 0, 1);
+            this.turtle.rotate(-this.degree, 0, 0, 1);
         } else if (string[i] == ".") {
-            this.turtle.rotate(30, 0, 0, 1);
+            this.turtle.rotate(this.degree, 0, 0, 1);
         } else if (string[i] == "t") {
             this.addBranch(1.5);
         }
     }
 
- }
-
- regenerate(iterations: number, axiom: "string") {
-    this.destory();
-    this.depth = 1;
-    this.turtleStack = new TurtleStack();
-    this.turtle = this.turtleStack.getTurtle();
-    this.grammar = new Grammar(axiom, iterations);
-   // this.finalPos = new Array();
-   // this.finalNor = new Array();
-  //  this.finalUVs = new Array();
-  //  this.finalIndices = new Array();
-    this.create();
  }
 
   create() {

@@ -1,11 +1,11 @@
 import {vec3, vec4, mat4, quat} from 'gl-matrix';
 import Drawable from '../rendering/gl/Drawable';
 import {gl} from '../globals';
-import Branch from './Branch';
+import Leaf from './Leaf';
 
-class BranchLoader extends Drawable{
-    branches: Branch[];
-    branchObj: any;
+class LeafLoader extends Drawable{
+    leaves: Leaf[];
+    leafObj: any;
     center: vec4;
 
     indices: Uint32Array;
@@ -13,11 +13,11 @@ class BranchLoader extends Drawable{
     normals: Float32Array;
     uvs: Float32Array;
 
-    constructor(branches: Branch[], branchObj: any, center: vec4) {
+    constructor(leaves: Leaf[], leafObj: any, center: vec4) {
         super();
-        this.branchObj = branchObj;
+        this.leafObj = leafObj;
         this.center = center;
-        this.branches = branches;
+        this.leaves = leaves;
     }
     
     create() {
@@ -28,30 +28,30 @@ class BranchLoader extends Drawable{
         let normals = new Array<number>();
         let uvs = new Array<number>();
 
-        for(let b = 0; b < this.branches.length; b++) {
+        for(let b = 0; b < this.leaves.length; b++) {
             
             let vertexLength = vertices.length / 4;
 
             // current translation data
             var totalTrans = mat4.create();
-            var currRot = this.branches[b].orientation;
+            var currRot = this.leaves[b].orientation;
             quat.normalize(currRot, currRot);
-            var currPos = this.branches[b].position;
-            var currScale = this.branches[b].scale;
+            var currPos = this.leaves[b].position;
+            var currScale = this.leaves[b].scale;
 
             // create translation matrix for the current branch by which to transform the vertices
             mat4.fromRotationTranslationScale(totalTrans, currRot, 
             vec3.fromValues(currPos[0], currPos[1], currPos[2]), vec3.fromValues(currScale, currScale, currScale));
 
-            for(let i = 0; i < this.branchObj.vertices.length; i+=3) {
+            for(let i = 0; i < this.leafObj.vertices.length; i+=3) {
                 
                 // get default vertex positions
-                let vertex = vec3.fromValues(this.branchObj.vertices[i], this.branchObj.vertices[i+ 1], this.branchObj.vertices[i + 2]);
+                let vertex = vec3.fromValues(this.leafObj.vertices[i], this.leafObj.vertices[i+ 1], this.leafObj.vertices[i + 2]);
                 vec3.transformMat4(vertex, vertex, totalTrans);
                 vertices.push(vertex[0], vertex[1], vertex[2], 1);
                 
                 // rotate normals
-                let normal = vec3.fromValues(this.branchObj.vertexNormals[i], this.branchObj.vertexNormals[i + 1], this.branchObj.vertexNormals[i + 2]);
+                let normal = vec3.fromValues(this.leafObj.vertexNormals[i], this.leafObj.vertexNormals[i + 1], this.leafObj.vertexNormals[i + 2]);
                 let rotMat = mat4.create();
                 mat4.fromQuat(rotMat, currRot);
                 vec3.transformMat4(normal, normal, rotMat);
@@ -59,12 +59,12 @@ class BranchLoader extends Drawable{
                 normals.push(normal[0], normal[1], normal[2], 0);
 
             }
-            for(let i = 0; i < this.branchObj.textures.length; i+=2) {
-                uvs.push(this.branchObj.textures[i]);
-                uvs.push(this.branchObj.textures[i + 1]);
+            for(let i = 0; i < this.leafObj.textures.length; i+=2) {
+                uvs.push(this.leafObj.textures[i]);
+                uvs.push(this.leafObj.textures[i + 1]);
             }
-            for(let i = 0; i < this.branchObj.indices.length; i++) {
-                indices.push(this.branchObj.indices[i] + vertexLength);
+            for(let i = 0; i < this.leafObj.indices.length; i++) {
+                indices.push(this.leafObj.indices[i] + vertexLength);
             }
         }
 
@@ -94,4 +94,4 @@ class BranchLoader extends Drawable{
     }
 }
 
-export default BranchLoader;
+export default LeafLoader;

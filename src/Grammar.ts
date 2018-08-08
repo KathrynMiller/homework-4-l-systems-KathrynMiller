@@ -16,7 +16,7 @@ class Grammar {
         // branch expansions (mostly just slightly changed reiterations)
           this.branchMap.push("+bf[+b>f]");
           this.branchMap.push("-bf[+b]");
-          this.branchMap.push("*b<f[+>>f]");
+          this.branchMap.push("*b<f[+>f]");
           this.branchMap.push(".bf[*bf]");
 
         // initialize grammar array

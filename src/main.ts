@@ -28,9 +28,10 @@ window.onload = function() {
 // Define an object with application parameters and button callbacks
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
-  'axiom' : "t[.b][+b][*b]",
+  'axiom' : "t[.b][+b][*b][-b][<*b]",
   'iterations': 2,
   'rotationAngle': 30,
+  'leafColor' : [233.0, 200.0, 91.0, 1],
   'Generate': loadScene,
 };
 
@@ -42,9 +43,10 @@ let time: number = 0;
 
 
 function loadScene() {
-  plant = new Plant(vec3.fromValues(0, 0, 0), stem, leaf, "t[.b][+b][*b]", controls.iterations.valueOf(), controls.rotationAngle.valueOf());
+  plant = new Plant(vec3.fromValues(0, 0, 0), stem, leaf, controls.axiom.valueOf(), controls.iterations.valueOf(), controls.rotationAngle.valueOf());
   plant.buildShape();
   plant.branchLoader.create();
+  plant.leafLoader.create();
   // modified cube to be plant base
   base = new Cube(vec3.fromValues(0, 2, 0));
   base.create();
@@ -65,8 +67,9 @@ function main2() {
   // Add controls to the gui
   const gui = new DAT.GUI();
  var axiom = gui.add(controls, 'axiom');
- var iterations = gui.add(controls, 'iterations', 0, 5).step(1);
+ var iterations = gui.add(controls, 'iterations', 0, 10).step(1);
  var rotationAngle = gui.add(controls, 'rotationAngle', 0, 90);
+ var color = gui.addColor(controls, 'leafColor');
  gui.add(controls, 'Generate');
 
   // get canvas and webgl context
@@ -81,7 +84,7 @@ function main2() {
   // Later, we can import `gl` from `globals.ts` to access it
   setGL(gl);
 
-    loadScene();
+  loadScene();
 
   const camera = new Camera(vec3.fromValues(0, 2, 8), vec3.fromValues(0, 0, 0));
 
@@ -89,14 +92,21 @@ function main2() {
   renderer.setClearColor(0.2, 0.2, 0.2, 1);
   gl.enable(gl.DEPTH_TEST);
 
- 
+
   const lambert = new ShaderProgram([
     new Shader(gl.VERTEX_SHADER, require('./shaders/lambert-vert.glsl')),
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag.glsl')),
   ]);
 
+  const leafLambert = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/lambert-vert.1.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag.1.glsl')),
+  ]);
+  leafLambert.setGeometryColor(vec4.fromValues(controls.leafColor[0]/255.0,controls.leafColor[1]/255.0, controls.leafColor[2]/255.0, 1.0));
+
   // initialize time in shader
   lambert.setTime(time);
+  leafLambert.setTime(time);
   time++;
   
   // This function will be called every frame
@@ -104,7 +114,12 @@ function main2() {
     camera.update();
     
     lambert.setTime(time);
+    leafLambert.setTime(time);
     time++; 
+
+    color.onChange(function(value: vec4) {
+      leafLambert.setGeometryColor(vec4.fromValues(controls.leafColor[0]/255.0,controls.leafColor[1]/255.0, controls.leafColor[2]/255.0, 1.0));
+    });
 
     stats.begin();
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
@@ -114,6 +129,10 @@ function main2() {
        plant.branchLoader,
        base, 
     ]);
+
+    renderer.render(camera, leafLambert, [
+      plant.leafLoader,
+   ]);
     stats.end();
 
     // Tell the browser to call `tick` again whenever it renders a new frame

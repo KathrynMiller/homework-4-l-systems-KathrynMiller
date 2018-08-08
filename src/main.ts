@@ -31,6 +31,7 @@ const controls = {
   'axiom' : "t[.b][+b][*b]",
   'iterations': 2,
   'rotationAngle': 30,
+  'Generate': loadScene,
 };
 
 let icosphere: Icosphere;
@@ -41,12 +42,12 @@ let time: number = 0;
 
 
 function loadScene() {
-  plant = new Plant(vec3.fromValues(0, 0, 0), stem, leaf, "t[.b][+b][*b]", 2, 30);
-  plant.create();
+  plant = new Plant(vec3.fromValues(0, 0, 0), stem, leaf, "t[.b][+b][*b]", controls.iterations.valueOf(), controls.rotationAngle.valueOf());
+  plant.buildShape();
+  plant.branchLoader.create();
   // modified cube to be plant base
-  base = new Cube(vec3.fromValues(0, 0, 0));
+  base = new Cube(vec3.fromValues(0, 2, 0));
   base.create();
-
 }
 
 // fix for loader being called after main
@@ -66,6 +67,7 @@ function main2() {
  var axiom = gui.add(controls, 'axiom');
  var iterations = gui.add(controls, 'iterations', 0, 5).step(1);
  var rotationAngle = gui.add(controls, 'rotationAngle', 0, 90);
+ gui.add(controls, 'Generate');
 
   // get canvas and webgl context
   const canvas = <HTMLCanvasElement> document.getElementById('canvas');
@@ -102,34 +104,14 @@ function main2() {
     camera.update();
     
     lambert.setTime(time);
-    time++;
-
-    iterations.onChange(function() {
-      plant.destory();
-      plant = new Plant(vec3.fromValues(0, 0, 0), stem, leaf, controls.axiom.valueOf(), controls.iterations.valueOf(), controls.rotationAngle.valueOf());
-      plant.create();
-    }) 
-
-    axiom.onChange(function() {
-      plant.destory();
-      plant = new Plant(vec3.fromValues(0, 0, 0), stem, leaf, controls.axiom.valueOf(), controls.iterations.valueOf(), controls.rotationAngle.valueOf());
-      plant.create();
-    }) 
-
-    rotationAngle.onChange(function() {
-      plant.destory();
-      plant = new Plant(vec3.fromValues(0, 0, 0), stem, leaf, controls.axiom.valueOf(), controls.iterations.valueOf(), controls.rotationAngle.valueOf());
-      plant.create();
-    }) 
-
-    
+    time++; 
 
     stats.begin();
     gl.viewport(0, 0, window.innerWidth, window.innerHeight);
     renderer.clear();
   
     renderer.render(camera, lambert, [
-       plant,
+       plant.branchLoader,
        base, 
     ]);
     stats.end();

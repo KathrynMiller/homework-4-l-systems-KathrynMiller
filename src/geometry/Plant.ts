@@ -30,6 +30,9 @@ class Plant{
 
   leaves: Branch[];
   leafLoader: LeafLoader;
+
+  public minPos: vec3 = vec3.fromValues(100000, 100000, 100000);
+  public maxPos: vec3 = vec3.fromValues(-100000, -100000, -100000);
     
   constructor(center: vec3, stem: any, leaf: any, axiom: string, i: number, degree: number) {
     
@@ -74,11 +77,15 @@ class Plant{
 
             this.turtle.move(scale);
 
+            this.updateBounds(branch.position);
+
         } else if (string[i] == "f") {
            
             let leafScale = 0.2;
             let leaf = new Leaf(this.turtle.position, this.turtle.orientation, scale);
             this.leaves.push(leaf);
+
+            this.updateBounds(leaf.position);
 
            // this.turtle.move(leafScale);
         } else if (string[i] == "-") {
@@ -101,10 +108,22 @@ class Plant{
             this.branches.push(branch);
 
             this.turtle.move(trunkScale);
+
+            this.updateBounds(branch.position);
         }
     }
    this.branchLoader.branches = this.branches;
    this.leafLoader.leaves = this.leaves;
+ }
+
+ updateBounds(pos: vec4) {
+    this.maxPos[0] = Math.max(pos[0], this.maxPos[0]);
+    this.maxPos[1] = Math.max(pos[1], this.maxPos[1]);
+    this.maxPos[2] = Math.max(pos[2], this.maxPos[2]);
+
+    this.minPos[0] = Math.min(pos[0], this.minPos[0]);
+    this.minPos[1] = Math.min(pos[1], this.minPos[1]);
+    this.minPos[2] = Math.min(pos[2], this.minPos[2]);
  }
 
 };

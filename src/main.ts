@@ -9,6 +9,7 @@ import Camera from './Camera';
 import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 import Plant from './geometry/Plant';
+import FallingLoader from './geometry/FallingLoader';
 
 var OBJ = require('webgl-obj-loader');
 let stem: object;
@@ -39,6 +40,7 @@ let icosphere: Icosphere;
 let square: Square;
 let base: Cube;
 let plant: Plant;
+let fallingLoader: FallingLoader;
 let time: number = 0;
 
 
@@ -47,6 +49,8 @@ function loadScene() {
   plant.buildShape();
   plant.branchLoader.create();
   plant.leafLoader.create();
+  fallingLoader = new FallingLoader(leaf, plant.minPos, plant.maxPos, 20);
+  fallingLoader.create();
   // modified cube to be plant base
   base = new Cube(vec3.fromValues(0, 2, 0));
   base.create();
@@ -132,6 +136,7 @@ function main2() {
 
     renderer.render(camera, leafLambert, [
       plant.leafLoader,
+      fallingLoader,
    ]);
     stats.end();
 

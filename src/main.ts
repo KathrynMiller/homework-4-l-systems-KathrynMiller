@@ -10,17 +10,24 @@ import {setGL} from './globals';
 import ShaderProgram, {Shader} from './rendering/gl/ShaderProgram';
 import Plant from './geometry/Plant';
 import FallingLoader from './geometry/FallingLoader';
+import ObjLoader from './geometry/ObjLoader';
 
 var OBJ = require('webgl-obj-loader');
 let stem: object;
 let leaf: object;
+let base: object;
+let floor: object;
 window.onload = function() {
   OBJ.downloadMeshes({
     'stem': './src/objs/stem.obj',
-    'leaf': './src/objs/leaf.obj'
+    'leaf': './src/objs/leaf.obj',
+    'base': './src/objs/base.obj',
+    'floor': './src/objs/floor.obj'
   }, function(meshes: any) {
     stem = meshes.stem;
     leaf = meshes.leaf;
+    base = meshes.base;
+    floor = meshes.floor;
     main2();
   });
 }
@@ -39,9 +46,11 @@ const controls = {
 
 let icosphere: Icosphere;
 let square: Square;
-let base: Cube;
+//let base: Cube;
 let plant: Plant;
 let fallingLoader: FallingLoader;
+let baseLoader: ObjLoader;
+let floorLoader: ObjLoader;
 let time: number = 0;
 
 
@@ -53,10 +62,18 @@ function loadScene() {
   fallingLoader = new FallingLoader(leaf, plant.minPos, plant.maxPos, 20);
   fallingLoader.create();
   // modified cube to be plant base
-  base = new Cube(vec3.fromValues(0, 2, 0));
-  base.create();
-  square = new Square(vec3.fromValues(100, 100, 100));
-  square.create();
+  //base = new Cube(vec3.fromValues(0, 2, 0));
+ // base.create();
+
+ // make the base
+  baseLoader = new ObjLoader(base, vec3.fromValues(1, 0, 0));
+  baseLoader.create();
+  // make the floor 
+  floorLoader = new ObjLoader(floor, vec3.fromValues(0, 1, 0));
+  floorLoader.create();
+
+  // square = new Square(vec3.fromValues(100, 100, 100));
+  // square.create();
 }
 
 // fix for loader being called after main
@@ -117,6 +134,11 @@ function main2() {
   leafLambert.setGeometryColor(vec4.fromValues(controls.leafColor[0]/255.0,controls.leafColor[1]/255.0, controls.leafColor[2]/255.0, 1.0));
   fallingLambert.setGeometryColor(vec4.fromValues(controls.leafColor[0]/255.0,controls.leafColor[1]/255.0, controls.leafColor[2]/255.0, 1.0));
 
+  const objLambert = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/lambert-vert.3.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag.3.glsl')),
+  ]);
+
   // initialize time in shader
   lambert.setTime(time);
   leafLambert.setTime(time);
@@ -143,8 +165,8 @@ function main2() {
   
     renderer.render(camera, lambert, [
        plant.branchLoader,
-       base, 
-       square
+      // base, 
+      // square
     ]);
 
     renderer.render(camera, leafLambert, [
@@ -156,6 +178,11 @@ function main2() {
       fallingLoader,
     ]);
    }
+
+   renderer.render(camera, objLambert, [
+    baseLoader,
+    floorLoader,
+   ]);
 
     stats.end();
 

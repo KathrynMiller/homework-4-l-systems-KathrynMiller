@@ -52,11 +52,9 @@ void main()
 
 
     float weight = (sin((u_Time + (vs_Pos.x * 1.0 + vs_Pos.z * 1.0) * .008) * .015)) * .08;
-    vec4 movingPos = vs_Pos + vec4(0.0, -mod(u_Time * .005, u_MaxBound.y / .05), weight, 0.0);
-    //vec4 movingPos = vs_Pos + vec4(0.0, -mod(u_Time * .005, vs_Center.y), weight, 0.0);
-    if(movingPos.y < -0.5) {
-        //movingPos.y += u_MaxBound.y;
-    } 
+   // vec4 movingPos = vs_Pos + vec4(0.0, -mod(u_Time * .005, u_MaxBound.y / .05), weight, 0.0);
+    vec4 movingPos = vs_Pos + vec4(0.0, -mod(u_Time * .005, vs_Pos.y), weight, 0.0);
+
     vec4 modelposition = u_Model * movingPos;   // Temporarily store the transformed vertex positions for use below
 
     fs_LightVec = lightPos - modelposition;  // Compute the direction in which the light source lies

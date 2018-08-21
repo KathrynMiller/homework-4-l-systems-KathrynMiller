@@ -24,7 +24,7 @@ uniform sampler2D u_Texture;
 in vec2 fs_UV;
 
 vec4 baseCol = vec4(204.0 / 255.0, 255.0 / 255.0, 255.0 / 255.0, 1);
-vec4 leafCol = vec4(233.0 / 255.0, 200.0 / 255.0, 91.0 / 255.0, 1);
+vec4 leafCol = vec4(1, 0, 0, 1);
 
 out vec4 out_Col; // This is the final output color that you will see on your
                   // screen for the pixel that is currently being processed.

@@ -37,7 +37,7 @@ class LeafLoader extends Drawable{
             var currRot = this.leaves[b].orientation;
             quat.normalize(currRot, currRot);
             var currPos = this.leaves[b].position;
-            var currScale = this.leaves[b].scale;
+            var currScale = 1;//this.leaves[b].scale;
 
             // create translation matrix for the current branch by which to transform the vertices
             mat4.fromRotationTranslationScale(totalTrans, currRot, 

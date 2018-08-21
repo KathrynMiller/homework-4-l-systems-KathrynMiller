@@ -30,9 +30,10 @@ window.onload = function() {
 // This will be referred to by dat.GUI's functions that add GUI elements.
 const controls = {
   'axiom' : "t[.b][+b][*b][-b][<*b]",
-  'iterations': 2,
+  'iterations': 7,
   'rotationAngle': 30,
   'leafColor' : [233.0, 200.0, 91.0, 1],
+  'fallingLeaves' : false,
   'Generate': loadScene,
 };
 
@@ -54,6 +55,8 @@ function loadScene() {
   // modified cube to be plant base
   base = new Cube(vec3.fromValues(0, 2, 0));
   base.create();
+  square = new Square(vec3.fromValues(100, 100, 100));
+  square.create();
 }
 
 // fix for loader being called after main
@@ -74,6 +77,7 @@ function main2() {
  var iterations = gui.add(controls, 'iterations', 0, 10).step(1);
  var rotationAngle = gui.add(controls, 'rotationAngle', 0, 90);
  var color = gui.addColor(controls, 'leafColor');
+ var fallingLeaves = gui.add(controls, 'fallingLeaves');
  gui.add(controls, 'Generate');
 
   // get canvas and webgl context
@@ -90,7 +94,7 @@ function main2() {
 
   loadScene();
 
-  const camera = new Camera(vec3.fromValues(0, 2, 8), vec3.fromValues(0, 0, 0));
+  const camera = new Camera(vec3.fromValues(0, 3, 8), vec3.fromValues(0, 1, 0));
 
   const renderer = new OpenGLRenderer(canvas);
   renderer.setClearColor(0.2, 0.2, 0.2, 1);
@@ -106,11 +110,17 @@ function main2() {
     new Shader(gl.VERTEX_SHADER, require('./shaders/lambert-vert.1.glsl')),
     new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag.1.glsl')),
   ]);
+  const fallingLambert = new ShaderProgram([
+    new Shader(gl.VERTEX_SHADER, require('./shaders/lambert-vert.2.glsl')),
+    new Shader(gl.FRAGMENT_SHADER, require('./shaders/lambert-frag.2.glsl')),
+  ]);
   leafLambert.setGeometryColor(vec4.fromValues(controls.leafColor[0]/255.0,controls.leafColor[1]/255.0, controls.leafColor[2]/255.0, 1.0));
+  fallingLambert.setGeometryColor(vec4.fromValues(controls.leafColor[0]/255.0,controls.leafColor[1]/255.0, controls.leafColor[2]/255.0, 1.0));
 
   // initialize time in shader
   lambert.setTime(time);
   leafLambert.setTime(time);
+  fallingLambert.setTime(time);
   time++;
   
   // This function will be called every frame
@@ -119,10 +129,12 @@ function main2() {
     
     lambert.setTime(time);
     leafLambert.setTime(time);
+    fallingLambert.setTime(time);
     time++; 
 
     color.onChange(function(value: vec4) {
       leafLambert.setGeometryColor(vec4.fromValues(controls.leafColor[0]/255.0,controls.leafColor[1]/255.0, controls.leafColor[2]/255.0, 1.0));
+      fallingLambert.setGeometryColor(vec4.fromValues(controls.leafColor[0]/255.0,controls.leafColor[1]/255.0, controls.leafColor[2]/255.0, 1.0));
     });
 
     stats.begin();
@@ -132,12 +144,19 @@ function main2() {
     renderer.render(camera, lambert, [
        plant.branchLoader,
        base, 
+       square
     ]);
 
     renderer.render(camera, leafLambert, [
       plant.leafLoader,
-      fallingLoader,
+     // fallingLoader,
    ]);
+   if(controls.fallingLeaves.valueOf() == true) {
+    renderer.render(camera, fallingLambert, [
+      fallingLoader,
+    ]);
+   }
+
     stats.end();
 
     // Tell the browser to call `tick` again whenever it renders a new frame

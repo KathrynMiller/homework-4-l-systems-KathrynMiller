@@ -61,19 +61,14 @@ function loadScene() {
   plant.leafLoader.create();
   fallingLoader = new FallingLoader(leaf, plant.minPos, plant.maxPos, 20);
   fallingLoader.create();
-  // modified cube to be plant base
-  //base = new Cube(vec3.fromValues(0, 2, 0));
- // base.create();
 
  // make the base
-  baseLoader = new ObjLoader(base, vec3.fromValues(1, 0, 0));
+  baseLoader = new ObjLoader(base, vec3.fromValues(194 / 255, 202 / 255, 201 / 255));
   baseLoader.create();
   // make the floor 
-  floorLoader = new ObjLoader(floor, vec3.fromValues(0, 1, 0));
+  floorLoader = new ObjLoader(floor, vec3.fromValues(90 / 255, 138 / 255, 120 / 255));
   floorLoader.create();
 
-  // square = new Square(vec3.fromValues(100, 100, 100));
-  // square.create();
 }
 
 // fix for loader being called after main

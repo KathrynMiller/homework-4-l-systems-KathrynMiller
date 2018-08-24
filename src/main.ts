@@ -63,10 +63,12 @@ function loadScene() {
   fallingLoader.create();
 
  // make the base
-  baseLoader = new ObjLoader(base, vec3.fromValues(194 / 255, 202 / 255, 201 / 255));
+ // baseLoader = new ObjLoader(base, vec3.fromValues(194 / 255, 202 / 255, 201 / 255)); // silver
+  baseLoader = new ObjLoader(base, vec3.fromValues(108 / 255, 88 / 255, 75 / 255)); // brown
   baseLoader.create();
   // make the floor 
   floorLoader = new ObjLoader(floor, vec3.fromValues(90 / 255, 138 / 255, 120 / 255));
+
   floorLoader.create();
 
 }

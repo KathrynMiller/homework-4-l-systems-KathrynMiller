@@ -25,10 +25,17 @@ class FallingLoader extends Drawable{
 
     randomPos(): vec3 {
         var final = vec3.create();
+        var topThird = this.maxPos[1] - ((this.maxPos[1] - this.minPos[1]) / 3.0); // the minimum height from which to fall
         final = vec3.fromValues(this.minPos[0] + Math.random() * (this.maxPos[0] - this.minPos[0]), 
-                                this.minPos[1] + (Math.random() - 0.2)*(this.maxPos[1] - this.minPos[1]), 
+                                topThird + (Math.random() - 0.2) * (this.maxPos[1] - topThird), 
                                 this.minPos[2] + Math.random() * (this.maxPos[2] - this.minPos[2]));
         return final;
+    }
+
+    randomRotation(): quat {
+        var q = quat.create();
+        quat.fromEuler(q, Math.random() * 180.0, Math.random() * 180.0, Math.random() * 180.0);
+        return q;
     }
 
     create() {
@@ -47,7 +54,7 @@ class FallingLoader extends Drawable{
             // current translation data
             let totalTrans = mat4.create();
             //var currRot = this.leaves[b].orientation;
-            let currRot = quat.create();
+            let currRot = this.randomRotation();
             quat.normalize(currRot, currRot);
             let currPos = this.randomPos();
             //var currScale = this.leaves[b].scale;
@@ -60,9 +67,10 @@ class FallingLoader extends Drawable{
                  let vertex = vec3.fromValues(this.leafObj.vertices[i], this.leafObj.vertices[i+ 1], this.leafObj.vertices[i + 2]);
 
                  // calculate centers
-                if(i==0)
+             //   if(i==0)
                 {
-                  let center = vec3.fromValues(vertex[0] + currPos[0], vertex[1] + currPos[1], vertex[2] + currPos[2]);
+                  let center = vec3.fromValues(currPos[0], currPos[1], currPos[2]);
+                  //let center = vec3.fromValues(vertex[0] + currPos[0], vertex[1] + currPos[1], vertex[2] + currPos[2]);
                   centers.push( center[0], center[1], center[2], 1);
                 }
                
@@ -97,7 +105,7 @@ class FallingLoader extends Drawable{
         this.generatePos();
         this.generateNor();
         this.generateUVs();
-     //   this.generateCenter();
+        this.generateCenter();
 
         this.count = indices.length;
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.bufIdx);
@@ -112,8 +120,11 @@ class FallingLoader extends Drawable{
         gl.bindBuffer(gl.ARRAY_BUFFER, this.bufUVs);
         gl.bufferData(gl.ARRAY_BUFFER, this.uvs, gl.STATIC_DRAW);
 
-       // gl.bindBuffer(gl.ARRAY_BUFFER, this.bufCenter);
-       // gl.bufferData(gl.ARRAY_BUFFER, this.centers, gl.STATIC_DRAW);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.bufCenter);
+        gl.bufferData(gl.ARRAY_BUFFER, this.centers, gl.STATIC_DRAW);
+
+        console.log(this.centers.length);
+        console.log(this.positions.length);
         
     }
 }

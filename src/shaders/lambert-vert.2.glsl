@@ -53,7 +53,7 @@ void main()
 
     float weight = (sin((u_Time + (vs_Pos.x * 1.0 + vs_Pos.z * 1.0) * .008) * .015)) * .08;
    // vec4 movingPos = vs_Pos + vec4(0.0, -mod(u_Time * .005, u_MaxBound.y / .05), weight, 0.0);
-    vec4 movingPos = vs_Pos + vec4(0.0, -mod(u_Time * .005, vs_Pos.y), weight, 0.0);
+    vec4 movingPos = vs_Pos + vec4(0.0, -mod(u_Time * .005, vs_Center.y + .2), weight, 0.0);
 
     vec4 modelposition = u_Model * movingPos;   // Temporarily store the transformed vertex positions for use below
 
